@@ -7,7 +7,7 @@ classdef RangeKalmanFilter < ExtendedKalmanFilter
             obj@ExtendedKalmanFilter(args);
         end
 
-
+        % Set functions
         function setFilterParameters(this, agent_, dynamics_, measurement_, ...
                                      num_edges, init_error_sigma)
             NUM_AGENTS = size(agent_, 2);
@@ -34,8 +34,6 @@ classdef RangeKalmanFilter < ExtendedKalmanFilter
             this.setStateCovarianceMatrix(P);
             this.setMeasurementCovarianceMatrix(R);
         end
-
-        % Set functions
         function setObservationMatrix(this, pos_i, pos_j, agent_id_i, agent_id_j, obs_index)
             dist = norm(pos_i - pos_j);
             DIM  = numel(pos_i);

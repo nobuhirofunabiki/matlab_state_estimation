@@ -59,5 +59,10 @@ classdef ExtendedKalmanFilter < handle
         function setMeasurementCovarianceMatrix(this, arg_covmat_measure)
             this.covmat_measure = arg_covmat_measure;
         end
+        function setMeasurementCovarianceMatrixElement(this, args)
+            index = args.index;
+            value = args.value;
+            this.covmat_measure(index, index) = value;
+        end
     end
 end
