@@ -11,9 +11,11 @@ classdef ExtendedKalmanFilter < handle
         Ad;
     end
     methods
-        function obj = ExtendedKalmanFilter(num_variable, num_measure)
+        function obj = ExtendedKalmanFilter(args)
+            num_variable = args.num_variable;
+            num_measure  = args.num_measure;
             obj.num_variable        = num_variable;
-            obj.num_measure         = num_mesaure;
+            obj.num_measure         = num_measure;
             obj.estimated_variable  = zeros(num_variable, 1);
             obj.obs_matrix          = zeros(num_measure, num_variable);
             obj.obs_measured        = zeros(num_measure, 1);
