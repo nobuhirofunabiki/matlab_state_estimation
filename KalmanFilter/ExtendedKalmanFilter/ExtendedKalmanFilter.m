@@ -40,6 +40,8 @@ classdef ExtendedKalmanFilter < handle
             % TODO: Add control and disturbance noises
             this.covmat_state = Ad*this.covmat_state*Ad.';
         end
+
+        % Set functions
         function setEstimatedVariable(this, index_begin, index_end, arg_variable)
             if length(arg_variable) ~= (index_end-index_begin)+1
                 error('Index designation is invaild.')
@@ -63,6 +65,11 @@ classdef ExtendedKalmanFilter < handle
             index = args.index;
             value = args.value;
             this.covmat_measure(index, index) = value;
+        end
+
+        % Get funcitons
+        function output = getPartialStateCovarianceMatrix(this, row1, row2, col1, col2)
+            output = this.covmat_state(row1:row2, col1:col2);
         end
     end
 end
