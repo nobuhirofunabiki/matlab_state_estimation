@@ -72,7 +72,11 @@ classdef DistributedInformationFilter < handle
 
         % Getters -------------------------------------------------------
 
-        function getInformationVector(this)
+        function output = getJointInformationVector(this)
+            output = this.obs_info_vector_joint;
+        end
+        function output = getJointInformationMatrix(this)
+            output = this.obs_info_matrix_joint;
         end
     end
 end
