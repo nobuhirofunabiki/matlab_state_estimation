@@ -17,14 +17,33 @@ classdef DistributedInformationFilter < handle
         out_info_vector_pool        % 
         out_info_matrix_pool        %
         obs_mesured                 % y(k)
-        Ad
+        system_matrix               % Ad
     end
     methods
         function obj = DistributedInformationFilter(args)
-            
+            NUM_VAR = args.number_variables;
+            NUM_MEA = args.number_measures;
+            obj.system_matrix               = args.system_matrix;
+            obj.state_vector                = zeros(NUM_VAR, 1);
+            obj.state_covmat                = zeros(NUM_VAR, NUM_VAR);
+            obj.info_vector                 = zeros(NUM_VAR, 1);
+            obj.info_matrix                 = zeros(NUM_VAR, NUM_VAR);
+            obj.obs_matrix                  = zeros(NUM_MEA, NUM_VAR);
+            obj.obs_covmat                  = zeros(NUM_MEA, NUM_MEA);
+            obj.obs_info_vector             = zeros(NUM_VAR, 1);
+            obj.obs_info_vector_prev        = zeros(NUM_VAR, 1);
+            obj.obs_info_vector_joint       = zeros(NUM_VAR, 1);
+            obj.obs_info_vector_joint_prev  = zeros(NUM_VAR, 1);
+            obj.obs_info_matrix             = zeros(NUM_VAR, NUM_VAR);
+            obj.obs_info_matrix_prev        = zeros(NUM_VAR, NUM_VAR);
+            obj.obs_info_matrix_joint       = zeros(NUM_VAR, NUM_VAR);
+            obj.obs_info_matrix_joint_prev  = zeros(NUM_VAR, NUM_VAR);
+            obj.out_info_vector_pool        = zeros(NUM_VAR, 1);
+            obj.out_info_matrix_pool        = zeros(NUM_VAR, NUM_VAR);
+            obj.obs_mesured                 = zeros(NUM_MEA, 1);
         end
         function propagateCovarianceMatrix(this)
-            Ad = this.Ad;
+            Ad = this.system_matrix;
             % TODO: Add control and disturbance noises
             this.state_covmat = Ad*this.state_covmat*Ad.';
         end
