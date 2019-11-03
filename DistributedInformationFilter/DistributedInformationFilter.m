@@ -26,17 +26,11 @@ classdef DistributedInformationFilter < handle
             % TODO: Add control and disturbance noises
             this.state_covmat = Ad*this.state_covmat*Ad.';
         end
-        function getInformationVector(this)
-        end
         function calculateObservationInformation(this)
             H = this.obs_matrix;
             R = this.obs_covmat;
             this.obs_info_vector = H.'/R*y;
             this.obs_info_matrix = H.'/R*H;
-        end
-        function addOutSourceInformationIntoPool(this, info_vector, info_matrix)
-            this.out_info_vector_pool = this.out_info_vector_pool + info_vector;
-            this.out_info_matrix_pool = this.out_info_matrix_pool + info_matrix;
         end
         function integrateMultiSourceInformation(this)
             this.obs_info_vector_joint = ...
@@ -53,6 +47,13 @@ classdef DistributedInformationFilter < handle
             this.state_vector = this.state_covmat + this.info_vector;
 
         end
+        
+        % Setters ---------------------------------------------------
+
+        function addOutSourceInformationIntoPool(this, info_vector, info_matrix)
+            this.out_info_vector_pool = this.out_info_vector_pool + info_vector;
+            this.out_info_matrix_pool = this.out_info_matrix_pool + info_matrix;
+        end
         function setMeasurementData(this, obs_measured)
             this.obs_measured  = obs_measured;
         end
@@ -67,6 +68,11 @@ classdef DistributedInformationFilter < handle
                 this.obs_matrix(obs_index, 2*DIM*(agent_id_j-1)+iDim)     = (pos_j(iDim,1)-pos_i(iDim,1))/dist;
                 this.obs_matrix(obs_index, 2*DIM*(agent_id_j-1)+DIM+iDim) = 0;
             end
+        end
+
+        % Getters -------------------------------------------------------
+
+        function getInformationVector(this)
         end
     end
 end
