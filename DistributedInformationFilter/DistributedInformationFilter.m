@@ -1,20 +1,22 @@
 classdef DistributedInformationFilter < handle
     properties (SetAccess = protected)
-        state_vector            % x(k)
-        state_covmat            % P(k)
-        info_vector             % z(k)
-        info_matrix             % Z(k)
-        obs_matrix              % H(k)
-        obs_covmat              % R(k)
-        obs_info_vector         % i(k)
-        obs_info_vector_prev    % i(k-1)
-        obs_info_vector_joint   % u(k)
-        obs_info_matrix         % I(k)
-        obs_info_matrix_prev    % I(k-1)
-        obs_info_matrix_joint   % U(k)
-        out_info_vector_pool    % 
-        out_info_matrix_pool    %
-        obs_mesured             % y(k)
+        state_vector                % x(k)
+        state_covmat                % P(k)
+        info_vector                 % z(k)
+        info_matrix                 % Z(k)
+        obs_matrix                  % H(k)
+        obs_covmat                  % R(k)
+        obs_info_vector             % i(k)
+        obs_info_vector_prev        % i(k-1)
+        obs_info_vector_joint       % u(k)
+        obs_info_vector_joint_prev  % u(k-1)
+        obs_info_matrix             % I(k)
+        obs_info_matrix_prev        % I(k-1)
+        obs_info_matrix_joint       % U(k)
+        obs_info_matrix_joint_prev  % U(k-1)
+        out_info_vector_pool        % 
+        out_info_matrix_pool        %
+        obs_mesured                 % y(k)
         Ad
     end
     methods
@@ -72,11 +74,17 @@ classdef DistributedInformationFilter < handle
 
         % Getters -------------------------------------------------------
 
-        function output = getJointInformationVector(this)
+        function output = getCurrentJointInformationVector(this)
             output = this.obs_info_vector_joint;
         end
-        function output = getJointInformationMatrix(this)
+        function output = getPreviousJointInformationVector(this)
+            output = this.obs_info_vector_joint_prev;
+        end
+        function output = getCurrentJointInformationMatrix(this)
             output = this.obs_info_matrix_joint;
+        end
+        function output = getPreviousJointInformationMatrix(this)
+            output = this.obs_info_matrix_joint_prev;
         end
     end
 end
