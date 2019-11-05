@@ -50,17 +50,6 @@ classdef DistributedInformationFilter < handle
             this.obs_info_matrix_prev = this.obs_info_matrix;
             this.obs_info_matrix_joint_prev = this.obs_info_matrix_joint;
         end
-        function resetObservationInformation(this)
-            this.obs_info_vector = zeros(size(this.obs_info_vector));
-            this.obs_info_matrix = zeros(size(this.obs_info_matrix));
-        end
-        function addObservationInformation(this, obs_matrix, obs_covmat, obs_measured)
-            H = obs_matrix;
-            R = obs_covmat;
-            y = obs_measured;
-            this.obs_info_vector = this.obs_info_vector + H.'/R*y;
-            this.obs_info_matrix = this.obs_info_matrix + H.'/R*H;
-        end
         function integrateMultiSourceInformation(this)
             this.obs_info_vector_joint = ...
                 this.obs_info_vector - this.obs_info_vector_prev ...
@@ -77,6 +66,18 @@ classdef DistributedInformationFilter < handle
             this.info_matrix = this.info_matrix + N * this.obs_info_matrix_joint;
             this.state_covmat = inv(this.info_matrix);
             this.state_vector = this.state_covmat * this.info_vector;
+        end
+
+        function addObservationInformation(this, obs_matrix, obs_covmat, obs_measured)
+            H = obs_matrix;
+            R = obs_covmat;
+            y = obs_measured;
+            this.obs_info_vector = this.obs_info_vector + H.'/R*y;
+            this.obs_info_matrix = this.obs_info_matrix + H.'/R*H;
+        end
+        function resetObservationInformation(this)
+            this.obs_info_vector = zeros(size(this.obs_info_vector));
+            this.obs_info_matrix = zeros(size(this.obs_info_matrix));
         end
         function clearOutSourceInformationPool(this)
             this.out_info_vector_pool = zeros(size(this.out_info_vector_pool));
