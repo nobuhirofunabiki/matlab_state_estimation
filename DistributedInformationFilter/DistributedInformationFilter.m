@@ -6,10 +6,6 @@ classdef DistributedInformationFilter < handle
         info_vector                 % z(k)
         info_matrix                 % Z(k)
         number_agents               % N
-        obs_matrix                  % H(k) for range
-        obs_covmat                  % R(k) for range
-        obs_matrix_position         % H(k) for position measurement
-        obs_covmat_position         % R(k) for position measurement
         obs_info_vector             % i(k)
         obs_info_vector_prev        % i(k-1)
         obs_info_vector_joint       % u(k)
@@ -20,24 +16,17 @@ classdef DistributedInformationFilter < handle
         obs_info_matrix_joint_prev  % U(k-1)
         out_info_vector_pool        % 
         out_info_matrix_pool        %
-        obs_measured                % y(k) for range
-        obs_measured_position       % y(k) for position measurement
         system_matrix               % Ad
     end
     methods
         function obj = DistributedInformationFilter(args)
             NUM_VAR = args.number_variables;
-            NUM_MEA = args.number_measures;
             obj.agent_id                    = args.agent_id;
             obj.number_agents               = args.number_agents;
             obj.state_vector                = zeros(NUM_VAR, 1);
             obj.state_covmat                = zeros(NUM_VAR, NUM_VAR);
             obj.info_vector                 = zeros(NUM_VAR, 1);
             obj.info_matrix                 = zeros(NUM_VAR, NUM_VAR);
-            obj.obs_matrix                  = zeros(NUM_MEA, NUM_VAR);
-            obj.obs_covmat                  = zeros(NUM_MEA, NUM_MEA);
-            obj.obs_matrix_position         = zeros(2, NUM_VAR);
-            obj.obs_covmat_position         = zeros(2, 2);
             obj.obs_info_vector             = zeros(NUM_VAR, 1);
             obj.obs_info_vector_prev        = zeros(NUM_VAR, 1);
             obj.obs_info_vector_joint       = zeros(NUM_VAR, 1);
@@ -48,8 +37,6 @@ classdef DistributedInformationFilter < handle
             obj.obs_info_matrix_joint_prev  = zeros(NUM_VAR, NUM_VAR);
             obj.out_info_vector_pool        = zeros(NUM_VAR, 1);
             obj.out_info_matrix_pool        = zeros(NUM_VAR, NUM_VAR);
-            obj.obs_measured                = zeros(NUM_MEA, 1);
-            obj.obs_measured_position       = zeros(2, 1);
             obj.system_matrix               = zeros(NUM_VAR, NUM_VAR);
         end
         function propagateCovarianceMatrix(this)
@@ -63,17 +50,14 @@ classdef DistributedInformationFilter < handle
             this.obs_info_matrix_prev = this.obs_info_matrix;
             this.obs_info_matrix_joint_prev = this.obs_info_matrix_joint;
         end
-        function calculateObservationInformation(this)
-            H = this.obs_matrix;
-            R = this.obs_covmat;
-            y = this.obs_measured;
-            this.obs_info_vector = H.'/R*y;
-            this.obs_info_matrix = H.'/R*H;
+        function resetObservationInformation(this)
+            this.obs_info_vector = zeros(size(this.obs_info_vector));
+            this.obs_info_matrix = zeros(size(this.obs_info_matrix));
         end
-        function addPositionMeasurementInformation(this)
-            H = this.obs_matrix_position;
-            R = this.obs_covmat_position;
-            y = this.obs_measured_position;
+        function addObservationInformation(this, obs_matrix, obs_covmat, obs_measured)
+            H = obs_matrix;
+            R = obs_covmat;
+            y = obs_measured;
             this.obs_info_vector = this.obs_info_vector + H.'/R*y;
             this.obs_info_matrix = this.obs_info_matrix + H.'/R*H;
         end
@@ -131,36 +115,6 @@ classdef DistributedInformationFilter < handle
         end
         function setEstimatedVariable(this, index_begin, index_end, arg_variable)
             this.state_vector(index_begin:index_end, 1) = arg_variable;
-        end
-        function setMeasurementData(this, obs_measured)
-            this.obs_measured  = obs_measured;
-        end
-        function setPositionMeasurementData(this, obs_measured)
-            this.obs_measured_position = obs_measured;
-        end
-        function setObservationMatrix(this, pos_i, pos_j, agent_id_i, agent_id_j, obs_index)
-            dist = norm(pos_i - pos_j);
-            DIM  = numel(pos_i);
-            for iDim = 1:DIM
-                % Agent ID: i
-                this.obs_matrix(obs_index, 2*DIM*(agent_id_i-1)+iDim)     = (pos_i(iDim,1)-pos_j(iDim,1))/dist;
-                this.obs_matrix(obs_index, 2*DIM*(agent_id_i-1)+DIM+iDim) = 0;
-                % Agent ID: j
-                this.obs_matrix(obs_index, 2*DIM*(agent_id_j-1)+iDim)     = (pos_j(iDim,1)-pos_i(iDim,1))/dist;
-                this.obs_matrix(obs_index, 2*DIM*(agent_id_j-1)+DIM+iDim) = 0;
-            end
-        end
-        function setPositionObservationMatrix(this)
-            this.obs_matrix_position(1,1) = 1;
-            this.obs_matrix_position(2,2) = 1;
-        end
-        function setPositionMeasurementCovarianceMatrixElement(this, index, value)
-            this.obs_covmat_position(index, index) = value^2;
-        end
-        function setMeasurementCovarianceMatrixElement(this, args)
-            index = args.index;
-            value = args.value;
-            this.obs_covmat(index, index) = value;
         end
 
         % Getters -------------------------------------------------------
