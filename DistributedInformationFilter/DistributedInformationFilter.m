@@ -123,6 +123,9 @@ classdef DistributedInformationFilter < handle
         function output = getStateVector(this)
             output = this.state_vector;
         end
+        function output = getStateCovarianceMatrix(this)
+            output = this.state_covmat;
+        end
         function output = getCurrentJointInformationVector(this)
             output = this.obs_info_vector_joint;
         end
