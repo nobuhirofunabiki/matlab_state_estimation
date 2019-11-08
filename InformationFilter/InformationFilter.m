@@ -26,16 +26,20 @@ classdef InformationFilter < handle
             % TODO: Add control and disturbance noises
             this.state_covmat = Ad*this.state_covmat*Ad.';
         end
-        function addObservationInformation(this, obs_matrix, obs_covmat, obs_measured)
+        function addObservationInformation(this, obs_matrix, obs_covmat, obs_measures)
             H = obs_matrix;
             R = obs_covmat;
-            y = obs_measured;
+            y = obs_measures;
             this.info_vector = this.info_vector + H.'/R*y;
             this.info_matrix = this.info_matrix + H.'/R*H;
         end
         function convertMomentsToInformationForm(this)
             this.info_matrix = inv(this.state_covmat);
             this.info_vector =  this.info_matrix * this.state_vector;
+        end
+        function convertInformationToMomentsForm(this)
+            this.state_covmat = inv(this.info_matrix);
+            this.state_vector = this.state_covmat * this.info_vector;
         end
 
         % Setters-------------------------------------------------------
