@@ -38,9 +38,37 @@ classdef InformationFilter < handle
             this.info_vector =  this.info_matrix * this.state_vector;
         end
 
-        % Setters
+        % Setters-------------------------------------------------------
         function setEstimatedVariable(this, index_begin, index_end, arg_variable)
             this.state_vector(index_begin:index_end, 1) = arg_variable;
+        end
+        function setStateCovarianceMatrix(this, args)
+            P = zeros(size(this.state_covmat));
+            num_dims = this.num_dims;
+            for iAgents = 1:this.num_agents
+                for iDims = 1:num_dims
+                    P(2*num_dims*(iAgents-1)+iDims, 2*num_dims*(iAgents-1)+iDims) = args.position_sigma^2;
+                    P(2*num_dims*(iAgents-1)+num_dims+iDims, 2*num_dims*(iAgents-1)+num_dims+iDims) = args.velocity_sigma^2;
+                end
+            end
+            this.state_covmat = P;
+        end
+        function setDiscreteSystemMatrix(this, discrete_system_matrix)
+            num_agents = this.num_agents;
+            num_vars = this.num_variables;
+            num_dims = this.num_dims;
+            Ad = zeros(num_vars, num_vars);
+            for iAgents = 1:num_agents
+                Ad(1+2*num_dims*(iAgents-1):2*num_dims*iAgents,...
+                    1+2*num_dims*(iAgents-1):2*num_dims*iAgents)...
+                = discrete_system_matrix;
+            end
+            this.system_matrix = Ad;
+        end
+
+        % Getters -------------------------------------------------------
+        function output = getStateVector(this)
+            output = this.state_vector;
         end
     end
 end
