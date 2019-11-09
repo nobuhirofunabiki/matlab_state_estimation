@@ -74,5 +74,8 @@ classdef InformationFilter < handle
         function output = getStateVector(this)
             output = this.state_vector;
         end
+        function output = getStateCovarianceMatrix(this)
+            output = this.state_covmat;
+        end
     end
 end
