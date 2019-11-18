@@ -12,7 +12,8 @@ classdef ParticleFilter < handle
         pdf_likelihood % function handle : likelihood function
         generator_sys_noise % function handle: noise of system equation
     end
-    methods
+
+    methods (SetAccess = public)
         function obj = ParticleFilter(args)
             obj.number_particles = args.number_particles;
             obj.number_variables = args.number_variables;
@@ -40,6 +41,15 @@ classdef ParticleFilter < handle
             this.prepareForNextFiltering();
         end
 
+        % Setters -------------------------------------------------------
+
+        % Getters -------------------------------------------------------
+        function output = getStateVector(this)
+            output = this.estimated_state;
+        end
+    end
+    
+    methods (SetAccess = protected)
         function updateParticles(this, args)
             for iParticles = 1:this.number_particles
                 % Update the particle states
@@ -86,12 +96,6 @@ classdef ParticleFilter < handle
             this.prior_particle_states = this.particle_states;
             this.prior_weights = this.weights;
         end
-
-        % Setters -------------------------------------------------------
-
-        % Getters -------------------------------------------------------
-        function output = getStateVector(this)
-            output = this.estimated_state;
-        end
+        
     end
 end
