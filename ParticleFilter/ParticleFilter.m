@@ -9,7 +9,6 @@ classdef ParticleFilter < handle
         prior_particle_states
         resample_percentage
         eq_sys % function handle: system equation
-        eq_obs % function handle: observation equation
         pdf_likelihood % function handle : likelihood function
         generator_sys_noise % function handle: noise of system equation
     end
@@ -28,7 +27,6 @@ classdef ParticleFilter < handle
             end
             obj.resample_percentage = args.resample_percentage;
             obj.eq_sys = args.eq_sys;
-            obj.eq_obs = args.eq_obs;
             obj.pdf_likelihood = args.pdf_likelihood;
             obj.generator_sys_noise = args.generator_sys_noise;
         end
