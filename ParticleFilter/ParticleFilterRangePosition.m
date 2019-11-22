@@ -20,11 +20,11 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
             obj.obs_covmat = diag(covmat_diag);
         end
 
-        function executeParticleFiltering(this, args)
-            args_updateParticles.time_step = args.time_step;
-            args_updateParticles.measurements = args.measurements;
-            args_updateParticles.number_agents = args.number_agents;
-            args_updateParticles.number_dimensions = args.number_dimensions;
+        function executeParticleFiltering(this, measurements)
+            % args_updateParticles.time_step = args.time_step;
+            args_updateParticles.measurements = measurements;
+            % args_updateParticles.number_agents = args.number_agents;
+            % args_updateParticles.number_dimensions = args.number_dimensions;
             this.updateParticles(args_updateParticles);
             this.resampleParticles();
             this.computeExtimatedStates();
@@ -75,8 +75,8 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
 
     methods
         function updateParticles(this, args)
-            args_temp.number_agents = args.number_agents;
-            args_temp.number_dimensions = args.number_dimensions;
+            args_temp.number_agents = this.num_agents;
+            args_temp.number_dimensions = args.num_dims;
             for iParticles = 1:this.number_particles
                 % Update the particle states
                 % this.particle_states(:,iParticles) = ...
@@ -130,6 +130,20 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
                 end
             end
             output = est_measures;
+        end
+
+        % Getters ----------------------------------------------------
+
+        function output = getNumberMeasurements(this)
+            output = this.num_measures;
+        end
+
+        function output = getNumberAgents(this)
+            output = this.num_agents;
+        end
+
+        function output = getNumberDimensions(this)
+            output = this.num_dims;
         end
     end
 end
