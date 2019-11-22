@@ -21,10 +21,7 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
         end
 
         function executeParticleFiltering(this, measurements)
-            % args_updateParticles.time_step = args.time_step;
             args_updateParticles.measurements = measurements;
-            % args_updateParticles.number_agents = args.number_agents;
-            % args_updateParticles.number_dimensions = args.number_dimensions;
             this.updateParticles(args_updateParticles);
             this.resampleParticles();
             this.computeExtimatedStates();
@@ -76,23 +73,15 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
     methods
         function updateParticles(this, args)
             args_temp.number_agents = this.num_agents;
-            args_temp.number_dimensions = args.num_dims;
+            args_temp.number_dimensions = this.num_dims;
             for iParticles = 1:this.number_particles
                 % Update the particle states
-                % this.particle_states(:,iParticles) = ...
-                %     this.eq_sys(args.time_step, ...
-                %         this.prior_particle_states(:,iParticles), ...
-                %         this.generator_sys_noise());
                 this.propagateParticleState(iParticles);
                 % Update the importance factors
                 args_temp.iParticles = iParticles;
-                estimated_measurements = calculateEstimatedMeasurements(args_temp);
-                means = zeros(this.num_measures,1);
-                likelihood = mvnpdf(args.measurements - estimated_measurements, means, this.obs_covmat);
-                % this.weights(iParticles,1) = ...
-                %     this.prior_weights(iParticles,1) ...
-                %     + this.pdf_likelihood(args.time_step, ...
-                %         args.measurements, estimated_measurements);
+                estimated_measurements = this.calculateEstimatedMeasurements(args_temp);
+                means = zeros(1, this.num_measures);
+                likelihood = mvnpdf(transpose(args.measurements - estimated_measurements), means, this.obs_covmat);
                 this.weights(iParticles,1) = this.prior_weights(iParticles,1) + likelihood;
             end
             % Normalization of the importance factors
@@ -103,7 +92,7 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
             % Only for the linear system equation
             this.particle_states(:,iParticles) = ...
                 this.system_matrix * this.prior_particle_states(:,iParticles) ...
-                + mvnrnd(zeros(size(this.particle_states(:,iParticles))), this.sys_covmat);
+                + transpose(mvnrnd(zeros(size(this.particle_states(:,iParticles))), this.sys_covmat));
         end
 
         function output = calculateEstimatedMeasurements(this, args)

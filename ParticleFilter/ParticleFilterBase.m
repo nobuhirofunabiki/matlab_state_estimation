@@ -17,6 +17,9 @@ classdef ParticleFilterBase < handle
             obj.estimated_state = zeros(obj.number_variables, 1);
             obj.weights = zeros(args.number_particles, 1);
             obj.prior_weights = zeros(size(obj.weights));
+            for iParticles = 1:obj.number_particles
+                obj.prior_weights(iParticles, 1) = 1./obj.number_particles;
+            end
             obj.particle_states = ...
                 zeros(args.number_variables, args.number_particles);
             obj.prior_particle_states = zeros(size(obj.particle_states));
