@@ -1,4 +1,4 @@
-classdef ParticleFilter < handle
+classdef ParticleFilterBase < handle
     properties (SetAccess = protected)
         number_particles
         number_variables
@@ -8,13 +8,10 @@ classdef ParticleFilter < handle
         particle_states
         prior_particle_states
         resample_percentage
-        eq_sys % function handle: system equation
-        pdf_likelihood % function handle : likelihood function
-        generator_sys_noise % function handle: noise of system equation
     end
 
-    methods (SetAccess = public)
-        function obj = ParticleFilter(args)
+    methods
+        function obj = ParticleFilterBase(args)
             obj.number_particles = args.number_particles;
             obj.number_variables = args.number_variables;
             obj.estimated_state = zeros(obj.number_variables, 1);
@@ -23,13 +20,10 @@ classdef ParticleFilter < handle
             obj.particle_states = ...
                 zeros(args.number_variables, args.number_particles);
             obj.prior_particle_states = zeros(size(obj.particle_states));
-            for iParticles = 1:obj.number_particles
-                obj.prior_particle_states(:,iParticles) = args.prior_particle_state();
-            end
+            % for iParticles = 1:obj.number_particles
+            %     obj.prior_particle_states(:,iParticles) = args.prior_particle_state();
+            % end
             obj.resample_percentage = args.resample_percentage;
-            obj.eq_sys = args.eq_sys;
-            obj.pdf_likelihood = args.pdf_likelihood;
-            obj.generator_sys_noise = args.generator_sys_noise;
         end
 
         function executeParticleFiltering(this, args)
@@ -37,7 +31,7 @@ classdef ParticleFilter < handle
             args_updateParticles.measurements = args.measurements;
             this.updateParticles(args_updateParticles);
             this.resampleParticles();
-            this.computeEstimatedStates();
+            this.computeExtimatedStates();
             this.prepareForNextFiltering();
         end
 
@@ -47,26 +41,10 @@ classdef ParticleFilter < handle
         function output = getStateVector(this)
             output = this.estimated_state;
         end
+
     end
-    
-    methods (SetAccess = protected)
-        function updateParticles(this, args)
-            for iParticles = 1:this.number_particles
-                % Update the particle states
-                this.particle_states(:,iParticles) = ...
-                    this.eq_sys(args.time_step, ...
-                        this.prior_particle_states(:,iParticles), ...
-                        this.generator_sys_noise());
-                % Update the importance factors
-                this.weights(iParticles,1) = ...
-                    this.prior_weights(iParticles,1) ...
-                    + this.pdf_likelihood(args.time_step, ...
-                        args.measurements, this.particle_states(:,iParticles));
-            end
-            % Normalization of the importance factors
-            this.weights = this.weights./sum(this.weights);
-        end
-        
+
+    methods
         function resampleParticles(this)
             Ns = this.number_particles;
             effective_sample_size = 1/sum(this.weights.^2);
@@ -83,7 +61,7 @@ classdef ParticleFilter < handle
             end
         end
 
-        function computeEstimatedStates(this)
+        function computeExtimatedStates(this)
             updated_states = zeros(this.number_variables, 1);
             for iParticles = 1:this.number_particles
                 updated_states = updated_states ...
@@ -96,6 +74,5 @@ classdef ParticleFilter < handle
             this.prior_particle_states = this.particle_states;
             this.prior_weights = this.weights;
         end
-        
     end
 end

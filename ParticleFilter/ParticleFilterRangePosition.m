@@ -1,17 +1,21 @@
-classdef ParticleFilterRangePosition < ParticleFilter
+classdef ParticleFilterRangePosition < ParticleFilterBase
     properties (SetAccess = protected)
-        system_matrix
+        system_matrix % Discrete matrix based on the same time step with the estimation period
         sys_covmat
         obs_covmat
         num_measures
+        num_agents
+        num_dims
     end
 
-    methods (SetAccess = public)
+    methods
         function obj = ParticleFilterRangePosition(args)
-            obj@ParticleFilter(args);
+            obj@ParticleFilterBase(args);
             obj.num_measures = args.num_measures;
-            obj.system_matrix = args.system_matrix;
-            obj.sys_covmat = args.sys_covmat;
+            obj.num_dims = args.num_dims;
+            obj.num_agents = args.num_agents;
+            obj.system_matrix = zeros(obj.number_variables, obj.number_variables);
+            obj.sys_covmat = zeros(size(obj.system_matrix));
             covmat_diag = 10.^10*ones(obj.num_measures,1);
             obj.obs_covmat = diag(covmat_diag);
         end
@@ -28,24 +32,58 @@ classdef ParticleFilterRangePosition < ParticleFilter
         end
 
         % Setters -------------------------------------------------
+
+        function setFirstParticleStates(this, initial_estimates)
+            for iParticles = 1:this.number_particles
+                this.prior_particle_states(:,iParticles) = ...
+                    mvnrnd(initial_estimates, this.sys_covmat);
+            end
+        end
+
         function setObservationCovarianceMatrix(this, covmat)
             if (size(covmat) ~= size(this.obs_covmat))
                 error("Invalid size of measurement covariance matrix")
             end
             this.obs_covmat = covmat;
         end
+
+        function setStateCovarianceMatrix(this, args)
+            P = zeros(size(this.sys_covmat));
+            num_dims = this.num_dims;
+            for iAgents = 1:this.num_agents
+                for iDims = 1:num_dims
+                    P(2*num_dims*(iAgents-1)+iDims, 2*num_dims*(iAgents-1)+iDims) = args.position_sigma^2;
+                    P(2*num_dims*(iAgents-1)+num_dims+iDims, 2*num_dims*(iAgents-1)+num_dims+iDims) = args.velocity_sigma^2;
+                end
+            end
+            this.sys_covmat = P;
+        end
+
+        function setDiscreteSystemMatrix(this, discrete_system_matrix)
+            num_agents = this.num_agents;
+            num_vars = this.number_variables;
+            num_dims = this.num_dims;
+            Ad = zeros(num_vars, num_vars);
+            for iAgents = 1:num_agents
+                Ad(1+2*num_dims*(iAgents-1):2*num_dims*iAgents,...
+                    1+2*num_dims*(iAgents-1):2*num_dims*iAgents)...
+                = discrete_system_matrix;
+            end
+            this.system_matrix = Ad;
+        end
     end
 
-    methods (SetAccess = protected)
+    methods
         function updateParticles(this, args)
             args_temp.number_agents = args.number_agents;
             args_temp.number_dimensions = args.number_dimensions;
             for iParticles = 1:this.number_particles
                 % Update the particle states
-                this.particle_states(:,iParticles) = ...
-                    this.eq_sys(args.time_step, ...
-                        this.prior_particle_states(:,iParticles), ...
-                        this.generator_sys_noise());
+                % this.particle_states(:,iParticles) = ...
+                %     this.eq_sys(args.time_step, ...
+                %         this.prior_particle_states(:,iParticles), ...
+                %         this.generator_sys_noise());
+                this.propagateParticleState(iParticles);
                 % Update the importance factors
                 args_temp.iParticles = iParticles;
                 estimated_measurements = calculateEstimatedMeasurements(args_temp);
@@ -65,7 +103,7 @@ classdef ParticleFilterRangePosition < ParticleFilter
             % Only for the linear system equation
             this.particle_states(:,iParticles) = ...
                 this.system_matrix * this.prior_particle_states(:,iParticles) ...
-                + mvnrnd(zeros(size(this.particle_states(:,iParticles))), );
+                + mvnrnd(zeros(size(this.particle_states(:,iParticles))), this.sys_covmat);
         end
 
         function output = calculateEstimatedMeasurements(this, args)
@@ -75,6 +113,7 @@ classdef ParticleFilterRangePosition < ParticleFilter
             iParticles = args.iParticles;
             est_measures = zeros(NUM_MEASURES, 1);
             iMeasures = 0;
+            % Estimated range measurements
             for iAgents = 1:NUM_AGENTS-1
                 for jAgents = iAgents+1:NUM_AGENTS
                     iMeasures = iMeasures + 1;
@@ -83,6 +122,7 @@ classdef ParticleFilterRangePosition < ParticleFilter
                     est_measures(iMeasures, 1) = norm(est_pos_iAgent - est_pos_jAgent);
                 end
             end
+            % Estimated position measurements
             for iAgents = 1:NUM_AGENTS
                 for iDims = 1:NUM_DIMS
                     iMeasures = iMeasures + 1;
