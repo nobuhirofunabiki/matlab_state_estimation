@@ -23,9 +23,6 @@ classdef ParticleFilterBase < handle
             obj.particle_states = ...
                 zeros(args.number_variables, args.number_particles);
             obj.prior_particle_states = zeros(size(obj.particle_states));
-            % for iParticles = 1:obj.number_particles
-            %     obj.prior_particle_states(:,iParticles) = args.prior_particle_state();
-            % end
             obj.resample_percentage = args.resample_percentage;
         end
 
@@ -59,12 +56,15 @@ classdef ParticleFilterBase < handle
                 % this works like the inverse of the empirical distribution and returns
                 % the interval where the sample is to be found
                 [~, idx] = histc(u1:1/Ns:1, edges);
-                this.particle_states = this.particle_states(idx);
+                particle_states = this.particle_states;
+                for iParticles = 1:Ns
+                    this.particle_states(:,iParticles) = particle_states(:,idx(1,iParticles));
+                end
                 this.weights = transpose(repmat(1/Ns, 1, Ns));
             end
         end
 
-        function computeExtimatedStates(this)
+        function computeEstimatedStates(this)
             updated_states = zeros(this.number_variables, 1);
             for iParticles = 1:this.number_particles
                 updated_states = updated_states ...
@@ -76,6 +76,14 @@ classdef ParticleFilterBase < handle
         function prepareForNextFiltering(this)
             this.prior_particle_states = this.particle_states;
             this.prior_weights = this.weights;
+        end
+
+        function output = getParticleNumber(this);
+            output = this.number_particles;
+        end
+
+        function output = getParticleStates(this)
+            output = this.particle_states;
         end
     end
 end

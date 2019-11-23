@@ -6,6 +6,7 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
         num_measures
         num_agents
         num_dims
+        likelihood
     end
 
     methods
@@ -18,13 +19,14 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
             obj.sys_covmat = zeros(size(obj.system_matrix));
             covmat_diag = 10.^10*ones(obj.num_measures,1);
             obj.obs_covmat = diag(covmat_diag);
+            obj.likelihood = ones(obj.number_particles,1);
         end
 
         function executeParticleFiltering(this, measurements)
             args_updateParticles.measurements = measurements;
             this.updateParticles(args_updateParticles);
             this.resampleParticles();
-            this.computeExtimatedStates();
+            this.computeEstimatedStates();
             this.prepareForNextFiltering();
         end
 
@@ -81,8 +83,9 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
                 args_temp.iParticles = iParticles;
                 estimated_measurements = this.calculateEstimatedMeasurements(args_temp);
                 means = zeros(1, this.num_measures);
-                likelihood = mvnpdf(transpose(args.measurements - estimated_measurements), means, this.obs_covmat);
-                this.weights(iParticles,1) = this.prior_weights(iParticles,1) + likelihood;
+                diff_measure = transpose(args.measurements - estimated_measurements);
+                this.likelihood(iParticles,1) = mvnpdf(diff_measure, means, this.obs_covmat);
+                this.weights(iParticles,1) = this.prior_weights(iParticles,1) * this.likelihood(iParticles,1);
             end
             % Normalization of the importance factors
             this.weights = this.weights./sum(this.weights);
@@ -90,9 +93,13 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
 
         function output = propagateParticleState(this, iParticles)
             % Only for the linear system equation
-            this.particle_states(:,iParticles) = ...
+            covmat = 0.05*eye(size(this.sys_covmat));
+            % this.particle_states(:,iParticles) = ...
+            %     this.system_matrix * this.prior_particle_states(:,iParticles) ...
+            %     + transpose(mvnrnd(zeros(size(this.particle_states(:,iParticles))), this.sys_covmat));
+                this.particle_states(:,iParticles) = ...
                 this.system_matrix * this.prior_particle_states(:,iParticles) ...
-                + transpose(mvnrnd(zeros(size(this.particle_states(:,iParticles))), this.sys_covmat));
+                + transpose(mvnrnd(zeros(size(this.particle_states(:,iParticles))), covmat));
         end
 
         function output = calculateEstimatedMeasurements(this, args)
@@ -115,7 +122,7 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
             for iAgents = 1:NUM_AGENTS
                 for iDims = 1:NUM_DIMS
                     iMeasures = iMeasures + 1;
-                    est_mesaures(iMeasures) = this.particle_states(2*NUM_DIMS*(iAgents-1)+iDims);
+                    est_measures(iMeasures, 1) = this.particle_states(2*NUM_DIMS*(iAgents-1)+iDims);
                 end
             end
             output = est_measures;
@@ -133,6 +140,10 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
 
         function output = getNumberDimensions(this)
             output = this.num_dims;
+        end
+
+        function output = getParticleLikelihood(this)
+            output = this.likelihood;
         end
     end
 end
