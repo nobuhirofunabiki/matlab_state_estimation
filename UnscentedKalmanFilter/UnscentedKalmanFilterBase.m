@@ -62,6 +62,11 @@ classdef UnscentedKalmanFilterBase < handle
             this.state_est = this.state_est + K*(measurements - this.z_pred);
             this.state_cov = this.state_cov - K*this.Pzz*K';
         end
+
+        % Getters ---------------------------------------------
+        function output = getStateEstimate(this)
+            output = this.state_est;
+        end
     end
 
 end
