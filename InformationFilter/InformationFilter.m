@@ -57,6 +57,9 @@ classdef InformationFilter < handle
             end
             this.state_covmat = P;
         end
+        function setStateCovarianceMatrixAll(this, state_covmat)
+            this.state_covmat = state_covmat;
+        end
         function setDiscreteSystemMatrix(this, discrete_system_matrix)
             num_agents = this.num_agents;
             num_vars = this.num_variables;
