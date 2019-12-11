@@ -30,8 +30,8 @@ classdef ParticleFilterBase < handle
             args_updateParticles.time_step = args.time_step;
             args_updateParticles.measurements = args.measurements;
             this.updateParticles(args_updateParticles);
+            this.computeEstimatedStates();
             this.resampleParticles();
-            this.computeExtimatedStates();
             this.prepareForNextFiltering();
         end
 
@@ -50,12 +50,14 @@ classdef ParticleFilterBase < handle
             effective_sample_size = 1/sum(this.weights.^2);
             sample_threshold = Ns * this.resample_percentage;
             if effective_sample_size < sample_threshold
+                hoge = cumsum(this.weights)';
                 edges = min([0 cumsum(this.weights)'],1); % protect against accumulated round-off
                 edges(end) = 1;                 % get the upper edge exact
                 u1 = rand/Ns;
                 % this works like the inverse of the empirical distribution and returns
                 % the interval where the sample is to be found
                 [~, idx] = histc(u1:1/Ns:1, edges);
+                % idx = randsample(1:Ns, Ns, true, this.weights);
                 particle_states = this.particle_states;
                 for iParticles = 1:Ns
                     this.particle_states(:,iParticles) = particle_states(:,idx(1,iParticles));

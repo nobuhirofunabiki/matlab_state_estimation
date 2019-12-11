@@ -2,11 +2,13 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
     properties (SetAccess = protected)
         system_matrix % Discrete matrix based on the same time step with the estimation period
         sys_covmat
+        Q               % process noise covariance matrix
         obs_covmat
         num_measures
         num_agents
         num_dims
         likelihood
+        counter
     end
 
     methods
@@ -17,16 +19,24 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
             obj.num_agents = args.num_agents;
             obj.system_matrix = zeros(obj.number_variables, obj.number_variables);
             obj.sys_covmat = zeros(size(obj.system_matrix));
+            obj.Q = args.process_noise_covmat;
             covmat_diag = 10.^10*ones(obj.num_measures,1);
             obj.obs_covmat = diag(covmat_diag);
             obj.likelihood = ones(obj.number_particles,1);
+            obj.counter = 0;
         end
 
         function executeParticleFiltering(this, measurements)
             args_updateParticles.measurements = measurements;
             this.updateParticles(args_updateParticles);
-            this.resampleParticles();
             this.computeEstimatedStates();
+            % this.showParticleStates();
+            this.resampleParticles();
+            if (this.counter == 0)
+                this.setParticleStatesOnlyVelocity();
+            end
+            this.counter = this.counter + 1;
+            % this.showParticleStates();
             this.prepareForNextFiltering();
         end
 
@@ -36,6 +46,18 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
             for iParticles = 1:this.number_particles
                 this.prior_particle_states(:,iParticles) = ...
                     mvnrnd(initial_estimates, this.sys_covmat);
+            end
+        end
+
+        function setParticleStatesOnlyVelocity(this)
+            for iParticles = 1:this.number_particles
+                particle_states = mvnrnd(this.particle_states(:,iParticles), this.sys_covmat);
+                for iAgents = 1:this.num_agents
+                    for iDims = 1:this.num_dims
+                        this.particle_states(2*this.num_dims*(iAgents-1)+this.num_dims+iDims, iParticles) ...
+                            = particle_states(2*this.num_dims*(iAgents-1)+this.num_dims+iDims);
+                    end
+                end
             end
         end
 
@@ -56,6 +78,10 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
                 end
             end
             this.sys_covmat = P;
+        end
+
+        function setStateCovarianceMatrixAll(this, sys_covmat)
+            this.sys_covmat = sys_covmat;
         end
 
         function setDiscreteSystemMatrix(this, discrete_system_matrix)
@@ -93,13 +119,18 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
 
         function output = propagateParticleState(this, iParticles)
             % Only for the linear system equation
-            covmat = 0.05*eye(size(this.sys_covmat));
             % this.particle_states(:,iParticles) = ...
             %     this.system_matrix * this.prior_particle_states(:,iParticles) ...
             %     + transpose(mvnrnd(zeros(size(this.particle_states(:,iParticles))), this.sys_covmat));
-                this.particle_states(:,iParticles) = ...
+            this.particle_states(:,iParticles) = ...
                 this.system_matrix * this.prior_particle_states(:,iParticles) ...
-                + transpose(mvnrnd(zeros(size(this.particle_states(:,iParticles))), covmat));
+                + transpose(mvnrnd(zeros(size(this.particle_states(:,iParticles))), this.Q));
+            
+            % TODO: debug
+            % covmat = 0.05*eye(size(this.sys_covmat));
+            % this.particle_states(:,iParticles) = ...
+            %     this.system_matrix * this.prior_particle_states(:,iParticles) ...
+            %         + transpose(mvnrnd(zeros(size(this.particle_states(:,iParticles))), covmat));
         end
 
         function output = calculateEstimatedMeasurements(this, args)
@@ -144,6 +175,28 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
 
         function output = getParticleLikelihood(this)
             output = this.likelihood;
+        end
+
+        function showParticleStates(this)
+            particle_states = this.getParticleStates();
+            num_particles = this.getParticleNumber();
+            num_agents = this.getNumberAgents();
+            num_dims = this.getNumberDimensions();
+            figure
+            for iParticles = 1:num_particles
+                state = particle_states(:,iParticles);
+                for iAgents = 1:num_agents
+                    x = state(2*num_dims*(iAgents-1)+1,1);
+                    y = state(2*num_dims*(iAgents-1)+2,1);
+                    scatter(x, y, ...
+                    'Marker', 'o', ...
+                    'SizeData', 5, ...
+                    'MarkerEdgeColor', 'none', ...
+                    'MarkerFaceColor', [0.4, 0.2, 0.45])
+                    hold on
+                end
+            end
+            hold off
         end
     end
 end
