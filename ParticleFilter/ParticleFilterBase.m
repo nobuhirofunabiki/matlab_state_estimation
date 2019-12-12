@@ -4,7 +4,6 @@ classdef ParticleFilterBase < handle
         number_variables
         estimated_state;
         weights % importance factor
-        prior_weights
         particle_states
         prior_particle_states
         resample_percentage
@@ -16,9 +15,8 @@ classdef ParticleFilterBase < handle
             obj.number_variables = args.number_variables;
             obj.estimated_state = zeros(obj.number_variables, 1);
             obj.weights = zeros(args.number_particles, 1);
-            obj.prior_weights = zeros(size(obj.weights));
             for iParticles = 1:obj.number_particles
-                obj.prior_weights(iParticles, 1) = 1./obj.number_particles;
+                obj.weights(iParticles, 1) = 1./obj.number_particles;
             end
             obj.particle_states = ...
                 zeros(args.number_variables, args.number_particles);
@@ -77,7 +75,6 @@ classdef ParticleFilterBase < handle
 
         function prepareForNextFiltering(this)
             this.prior_particle_states = this.particle_states;
-            this.prior_weights = this.weights;
         end
 
         function output = getParticleNumber(this);
