@@ -63,6 +63,15 @@ classdef ParticleFilterBase < handle
             end
         end
 
+        function normarizeWeights(this)
+            sum_weghts = sum(this.weights);
+            if sum_weghts ~= 0
+                this.weights = this.weights./sum(this.weights);
+            else
+                this.weights = zeros(this.number_particles, 1) + 1./this.number_particles;
+            end
+        end
+
         function computeEstimatedStates(this)
             updated_states = zeros(this.number_variables, 1);
             for iParticles = 1:this.number_particles

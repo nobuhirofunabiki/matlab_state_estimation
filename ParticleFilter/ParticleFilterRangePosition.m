@@ -113,8 +113,7 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
                     this.weights(iParticles,1) = this.weights(iParticles,1) * likelihood;
                 end
             end
-            % Normalization of the importance factors
-            this.weights = this.weights./sum(this.weights);
+            this.normarizeWeights();
         end
 
         function output = propagateParticleState(this, iParticles)
