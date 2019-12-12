@@ -28,8 +28,8 @@ classdef ParticleFilterBase < handle
             args_updateParticles.time_step = args.time_step;
             args_updateParticles.measurements = args.measurements;
             this.updateParticles(args_updateParticles);
-            this.computeEstimatedStates();
             this.resampleParticles();
+            this.computeEstimatedStates();
             this.prepareForNextFiltering();
         end
 
@@ -48,7 +48,6 @@ classdef ParticleFilterBase < handle
             effective_sample_size = 1/sum(this.weights.^2);
             sample_threshold = Ns * this.resample_percentage;
             if effective_sample_size < sample_threshold
-                hoge = cumsum(this.weights)';
                 edges = min([0 cumsum(this.weights)'],1); % protect against accumulated round-off
                 edges(end) = 1;                 % get the upper edge exact
                 u1 = rand/Ns;
