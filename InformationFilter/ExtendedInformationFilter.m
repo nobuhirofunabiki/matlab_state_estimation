@@ -8,11 +8,20 @@ classdef ExtendedInformationFilter < InformationFilter
             obj@InformationFilter(args);
         end
 
-        function addObservationInformation(this, args)
-            H = args.obs_matrix;
-            R = args.obs_covmat;
-            y = args.measures;
-            y_hat = args.measures_predicted;
+        function executeInformationFilter(this, args)
+            this.setStateVectorAll(args.prior_state);
+            this.convertMomentsToInformationForm();
+            this.addObservationInformation(...
+                args.obs_matrix, args.obs_covmat, args.measures, args.measures_predicted);
+            this.convertInformationToMomentsForm();
+        end
+
+        function addObservationInformation(this, ...
+            obs_matrix, obs_covmat, measures, measures_predicted)
+            H = obs_matrix;
+            R = obs_covmat;
+            y = measures;
+            y_hat = measures_predicted;
             x_hat = this.state_vector;
             this.info_vector = this.info_vector + H.'/R*(y - y_hat + H*x_hat);
             this.info_matrix = this.info_matrix + H.'/R*H;

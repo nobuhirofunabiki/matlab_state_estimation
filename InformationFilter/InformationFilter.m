@@ -7,7 +7,7 @@ classdef InformationFilter < handle
         state_covmat        % P(k): Covariance matrix of state
         info_vector         % xi(k): Information vector
         info_matrix         % Sigma(k): Information matrix
-        system_matrix       % Ad(k): System matrix
+        discrete_system_matrix       % Ad(k): System matrix
     end
     methods
         function obj = InformationFilter(args)
@@ -19,17 +19,24 @@ classdef InformationFilter < handle
             obj.state_covmat    = zeros(num_vars, num_vars);
             obj.info_vector     = zeros(num_vars, 1);
             obj.info_matrix     = zeros(num_vars, num_vars);
-            obj.system_matrix   = zeros(num_vars, num_vars);
+            obj.discrete_system_matrix   = zeros(num_vars, num_vars);
+        end
+        function executeInformationFilter(this, args)
+            this.setStateVectorAll(args.prior_state);
+            this.convertMomentsToInformationForm();
+            this.addObservationInformation(...
+                args.obs_matrix, args.obs_covmat, args.measures);
+            this.convertInformationToMomentsForm();
         end
         function propagateCovarianceMatrix(this)
-            Ad = this.system_matrix;
+            Ad = this.discrete_system_matrix;
             % TODO: Add control and disturbance noises
             this.state_covmat = Ad*this.state_covmat*Ad.';
         end
-        function addObservationInformation(this, obs_matrix, obs_covmat, obs_measures)
+        function addObservationInformation(this, obs_matrix, obs_covmat, measures)
             H = obs_matrix;
             R = obs_covmat;
-            y = obs_measures;
+            y = measures;
             this.info_vector = this.info_vector + H.'/R*y;
             this.info_matrix = this.info_matrix + H.'/R*H;
         end
@@ -45,6 +52,9 @@ classdef InformationFilter < handle
         % Setters-------------------------------------------------------
         function setEstimatedVariable(this, index_begin, index_end, arg_variable)
             this.state_vector(index_begin:index_end, 1) = arg_variable;
+        end
+        function setStateVectorAll(this, arg)
+            this.state_vector = arg;
         end
         function setStateCovarianceMatrix(this, args)
             P = zeros(size(this.state_covmat));
@@ -70,7 +80,7 @@ classdef InformationFilter < handle
                     1+2*num_dims*(iAgents-1):2*num_dims*iAgents)...
                 = discrete_system_matrix;
             end
-            this.system_matrix = Ad;
+            this.discrete_system_matrix = Ad;
         end
 
         % Getters -------------------------------------------------------
