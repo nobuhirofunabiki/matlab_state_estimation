@@ -9,7 +9,7 @@ classdef ExtendedInformationFilter < InformationFilter
         end
 
         function executeInformationFilter(this, args)
-            this.setStateVectorAll(args.prior_state);
+            this.predictStateVectorAndCovariance();
             this.convertMomentsToInformationForm();
             this.addObservationInformation(...
                 args.obs_matrix, args.obs_covmat, args.measures, args.measures_predicted);
