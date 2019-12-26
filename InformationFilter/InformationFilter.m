@@ -19,6 +19,7 @@ classdef InformationFilter < handle
             obj.num_agents              = args.num_agents;
             obj.state_vector            = zeros(num_vars, 1);
             obj.state_covmat            = zeros(num_vars, num_vars);
+            obj.state_covmat            = args.state_covmat;
             obj.process_noise_covmat    = args.process_noise_covmat;
             obj.info_vector             = zeros(num_vars, 1);
             obj.info_matrix             = zeros(num_vars, num_vars);
