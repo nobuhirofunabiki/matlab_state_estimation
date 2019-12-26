@@ -20,15 +20,15 @@ classdef UnscentedKalmanFilterBase < handle
 
     methods
         function obj = UnscentedKalmanFilterBase(args)
-            obj.alpha = args.alpha;
-            obj.beta = args.beta;
-            obj.kappa = args.kappa;
-            obj.state_dim = args.state_dim;
-            obj.state_est = args.state_est;
-            obj.state_cov = args.state_cov;
-            obj.lambda = obj.alpha^2 * (obj.state_dim + obj.kappa) - obj.state_dim;
-            gamma_2 = obj.state_dim + obj.lambda;
-            obj.gamma = sqrt(gamma_2);
+            obj.alpha       = args.alpha;
+            obj.beta        = args.beta;
+            obj.kappa       = args.kappa;
+            obj.state_dim   = args.state_dim;
+            obj.state_est   = args.state_est;
+            obj.state_cov   = args.state_cov;
+            obj.lambda      = obj.alpha^2 * (obj.state_dim + obj.kappa) - obj.state_dim;
+            gamma_2         = obj.state_dim + obj.lambda;
+            obj.gamma       = sqrt(gamma_2);
             % Weights for means
             obj.weights_mean = zeros(1,1+2*obj.state_dim);
             obj.weights_mean(1,1) = obj.lambda/gamma_2;

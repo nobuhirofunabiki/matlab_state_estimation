@@ -2,7 +2,7 @@ classdef UkfTargetTrackingRange < UnscentedKalmanFilterBase
     properties (SetAccess = protected)
         range_list      % List of measurement source [row: position vector, column: source serial number]
         obs_cov
-        A
+        discrete_system_matrix
         sys_cov
     end
     methods
@@ -10,7 +10,7 @@ classdef UkfTargetTrackingRange < UnscentedKalmanFilterBase
             obj@UnscentedKalmanFilterBase(args);
             obj.range_list = args.range_list;
             obj.obs_cov = args.obs_cov;
-            obj.A = args.A;
+            obj.discrete_system_matrix = args.discrete_system_matrix;
             obj.sys_cov = args.sys_cov;
         end
 
@@ -19,7 +19,7 @@ classdef UkfTargetTrackingRange < UnscentedKalmanFilterBase
             state_est_prior = zeros(size(this.state_est));
             sigma_point_states = zeros(size(this.sigma_points));
             for iPoints = 1:num_sigma_points
-                sigma_point_states(:,iPoints) = this.A*this.sigma_points(:,iPoints);
+                sigma_point_states(:,iPoints) = this.discrete_system_matrix*this.sigma_points(:,iPoints);
                 state_est_prior = state_est_prior ...
                     + this.weights_mean(1,iPoints)*sigma_point_states(:,iPoints);
             end
