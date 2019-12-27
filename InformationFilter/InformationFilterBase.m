@@ -1,7 +1,7 @@
 classdef InformationFilterBase < handle
     properties (SetAccess = protected)
         num_variables           % Number of variables
-        num_dims                % Number of dimensions (2D or 3D)
+        num_dimensions          % Number of dimensions (2D or 3D)
         state_vector            % x(k): State vector
         state_covmat            % P(k): Covariance matrix of state
         process_noise_covmat    % Q(k): Covariance matrix of process noise
@@ -14,27 +14,9 @@ classdef InformationFilterBase < handle
         function obj = InformationFilterBase(args)
             num_vars                    = args.num_variables;
             obj.num_variables           = num_vars;
-            obj.checkConstructorArguments_InformationFilterBase(args);
-            obj.num_dims                = args.num_dims;
-            obj.state_vector            = args.state_vector;
-            obj.state_covmat            = args.state_covmat;
-            obj.process_noise_covmat    = args.process_noise_covmat;
+            obj.num_dimensions          = args.num_dimensions;
             obj.info_vector             = zeros(num_vars, 1);
             obj.info_matrix             = zeros(num_vars, num_vars);
-            obj.discrete_system_matrix  = args.discrete_system_matrix;
-        end
-
-        function checkConstructorArguments_InformationFilterBase(this, args)
-            disp("Check constructor arguments for InformationFilterBase");
-            num_vars = this.num_variables;
-            assert(isequal(size(args.state_vector), [num_vars, 1]), ...
-                "state_vector is NOT correct size matrix");
-            assert(isequal(size(args.state_covmat), [num_vars, num_vars]), ...
-                "state_covmat is NOT correct size matrix");
-            assert(isequal(size(args.process_noise_covmat), [num_vars, num_vars]), ...
-                "process_noise_covmat is NOT correct size matrix");
-            assert(isequal(size(args.discrete_system_matrix), [num_vars, num_vars]), ...
-                "discrete_system_matrix is NOT correct size matrix");
         end
 
         function executeInformationFilter(this, args)
