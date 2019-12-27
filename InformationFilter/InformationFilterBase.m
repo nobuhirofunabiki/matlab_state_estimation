@@ -1,4 +1,4 @@
-classdef InformationFilter < handle
+classdef InformationFilterBase < handle
     properties (SetAccess = protected)
         num_variables           % Number of variables
         num_dims                % Number of dimensions (2D or 3D)
@@ -12,7 +12,7 @@ classdef InformationFilter < handle
     end
 
     methods
-        function obj = InformationFilter(args)
+        function obj = InformationFilterBase(args)
             num_vars                    = args.num_variables;
             obj.num_variables           = num_vars;
             obj.num_dims                = args.num_dims;
@@ -23,6 +23,19 @@ classdef InformationFilter < handle
             obj.info_vector             = zeros(num_vars, 1);
             obj.info_matrix             = zeros(num_vars, num_vars);
             obj.discrete_system_matrix  = args.discrete_system_matrix;
+        end
+
+        function checkConstructorArguments_InformationFilterBase(this, args)
+            disp("Check constructor arguments for InformationFilterBase");
+            num_vars = this.num_variables;
+            assert(isequal(size(args.state_vector), [num_vars, 1]), ...
+                "state_vector is NOT correct size matrix");
+            assert(isequal(size(args.state_covmat), [num_vars, num_vars]), ...
+                "state_covmat is NOT correct size matrix");
+            assert(isequal(size(args.process_noise_covmat), [num_vars, num_vars]), ...
+                "process_noise_covmat is NOT correct size matrix");
+            assert(isequal(size(args.discrete_system_matrix), [num_vars, num_vars]), ...
+                "discrete_system_matrix is NOT correct size matrix");
         end
 
         function executeInformationFilter(this, args)

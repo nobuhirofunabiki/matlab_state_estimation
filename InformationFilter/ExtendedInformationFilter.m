@@ -1,11 +1,11 @@
-classdef ExtendedInformationFilter < InformationFilter
+classdef ExtendedInformationFilter < InformationFilterBase
     properties (SetAccess = protected)
         
     end
 
     methods
         function obj = ExtendedInformationFilter(args)
-            obj@InformationFilter(args);
+            obj@InformationFilterBase(args);
         end
 
         function executeInformationFilter(this, args)
