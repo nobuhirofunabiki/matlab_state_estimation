@@ -1,7 +1,7 @@
 classdef ParticleFilterRangePosition < ParticleFilterBase
     properties (SetAccess = protected)
-        system_matrix % Discrete matrix based on the same time step with the estimation period
-        sys_covmat
+        discrete_system_matrix % Discrete matrix based on the same time step with the estimation period
+        state_covmat
         Q               % process noise covariance matrix
         obs_covmat
         num_measures
@@ -17,20 +17,22 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
             obj.num_measures = args.num_measures;
             obj.num_dims = args.num_dims;
             obj.num_agents = args.num_agents;
-            obj.system_matrix = zeros(obj.number_variables, obj.number_variables);
-            obj.sys_covmat = zeros(size(obj.system_matrix));
+            obj.discrete_system_matrix = args.discrete_system_matrix;
+            obj.state_covmat = args.state_covmat;
             obj.Q = args.process_noise_covmat;
             covmat_diag = 10.^10*ones(obj.num_measures,1);
             obj.obs_covmat = diag(covmat_diag);
             obj.likelihood = ones(obj.number_particles,1);
             obj.counter = 0;
+            obj.setFirstParticleStates(args.init_state_vector);
         end
 
         function executeParticleFiltering(this, measurements)
             args_updateParticles.measurements = measurements;
             this.updateParticles(args_updateParticles);
             this.resampleParticles();
-            if (this.counter == 0)
+            % TODO: This resampling for velocity should be implemented in a more logical way
+            if (this.counter < 10)
                 this.setParticleStatesOnlyVelocity();
             end
             this.counter = this.counter + 1;
@@ -43,13 +45,13 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
         function setFirstParticleStates(this, initial_estimates)
             for iParticles = 1:this.number_particles
                 this.prior_particle_states(:,iParticles) = ...
-                    mvnrnd(initial_estimates, this.sys_covmat);
+                    mvnrnd(initial_estimates, this.state_covmat);
             end
         end
 
         function setParticleStatesOnlyVelocity(this)
             for iParticles = 1:this.number_particles
-                particle_states = mvnrnd(this.particle_states(:,iParticles), this.sys_covmat);
+                particle_states = mvnrnd(this.particle_states(:,iParticles), this.state_covmat);
                 for iAgents = 1:this.num_agents
                     for iDims = 1:this.num_dims
                         this.particle_states(2*this.num_dims*(iAgents-1)+this.num_dims+iDims, iParticles) ...
@@ -67,7 +69,7 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
         end
 
         function setStateCovarianceMatrix(this, args)
-            P = zeros(size(this.sys_covmat));
+            P = zeros(size(this.state_covmat));
             num_dims = this.num_dims;
             for iAgents = 1:this.num_agents
                 for iDims = 1:num_dims
@@ -75,11 +77,11 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
                     P(2*num_dims*(iAgents-1)+num_dims+iDims, 2*num_dims*(iAgents-1)+num_dims+iDims) = args.velocity_sigma^2;
                 end
             end
-            this.sys_covmat = P;
+            this.state_covmat = P;
         end
 
-        function setStateCovarianceMatrixAll(this, sys_covmat)
-            this.sys_covmat = sys_covmat;
+        function setStateCovarianceMatrixAll(this, state_covmat)
+            this.state_covmat = state_covmat;
         end
 
         function setDiscreteSystemMatrix(this, discrete_system_matrix)
@@ -92,7 +94,7 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
                     1+2*num_dims*(iAgents-1):2*num_dims*iAgents)...
                 = discrete_system_matrix;
             end
-            this.system_matrix = Ad;
+            this.discrete_system_matrix = Ad;
         end
     end
 
@@ -119,7 +121,7 @@ classdef ParticleFilterRangePosition < ParticleFilterBase
         function output = propagateParticleState(this, iParticles)
             % Only for the linear system equation
             this.particle_states(:,iParticles) = ...
-                this.system_matrix * this.prior_particle_states(:,iParticles) ...
+                this.discrete_system_matrix * this.prior_particle_states(:,iParticles) ...
                 + sqrt(this.Q) * randn(length(this.particle_states(:,iParticles)),1);
         end
 

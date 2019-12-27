@@ -22,27 +22,23 @@ classdef ParticleFilterBase < handle
                 zeros(args.number_variables, args.number_particles);
             obj.prior_particle_states = zeros(size(obj.particle_states));
             obj.resample_percentage = args.resample_percentage;
+            obj.setInitialParticleStates(...
+                args.init_state_vector, args.init_state_covmat);
         end
 
-        function executeParticleFiltering(this, args)
-            args_updateParticles.time_step = args.time_step;
-            args_updateParticles.measurements = args.measurements;
-            this.updateParticles(args_updateParticles);
+        function executeParticleFiltering(this, measurements)
+            this.updateParticles(measurements);
             this.resampleParticles();
             this.computeEstimatedStates();
             this.prepareForNextFiltering();
         end
 
-        % Setters -------------------------------------------------------
-
-        % Getters -------------------------------------------------------
-        function output = getStateVector(this)
-            output = this.estimated_state;
+        function updateParticles(this, measurements)
+            this.propagateParticleStates();
+            this.updateParticleWeights(measurements);
+            this.normarizeWeights();
         end
 
-    end
-
-    methods
         function resampleParticles(this)
             Ns = this.number_particles;
             effective_sample_size = 1/sum(this.weights.^2);
@@ -83,6 +79,21 @@ classdef ParticleFilterBase < handle
 
         function prepareForNextFiltering(this)
             this.prior_particle_states = this.particle_states;
+        end
+
+        % Setters -------------------------------------------------------
+
+        function setInitialParticleStates(this, init_state_vector, init_state_covmat)
+            for iParticles = 1:this.number_particles
+                this.prior_particle_states(:,iParticles) = ...
+                    mvnrnd(init_state_vector, init_state_covmat);
+            end
+        end
+
+        % Getters -------------------------------------------------------
+
+        function output = getStateVector(this)
+            output = this.estimated_state;
         end
 
         function output = getParticleNumber(this);
