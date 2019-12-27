@@ -40,7 +40,7 @@ classdef EIF_FormationEstimationByRange < ExtendedInformationFilter
             positions = this.getPositionVector();
 
             % Range measurements
-            this.range_.setMeasurementVectorWithoutNoise(positions);
+            this.range_.calculateMeasurementVector(positions);
             this.range_.setObservationMatrix(positions);
             this.range_.updateMeasurementCovarianceMatrix(adjacent_matrix);
             obs_matrix_range = this.range_.getObservationMatrix();
