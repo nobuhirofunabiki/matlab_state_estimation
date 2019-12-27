@@ -2,7 +2,6 @@ classdef InformationFilterBase < handle
     properties (SetAccess = protected)
         num_variables           % Number of variables
         num_dims                % Number of dimensions (2D or 3D)
-        num_agents              % Number of agents
         state_vector            % x(k): State vector
         state_covmat            % P(k): Covariance matrix of state
         process_noise_covmat    % Q(k): Covariance matrix of process noise
@@ -15,8 +14,8 @@ classdef InformationFilterBase < handle
         function obj = InformationFilterBase(args)
             num_vars                    = args.num_variables;
             obj.num_variables           = num_vars;
+            obj.checkConstructorArguments_InformationFilterBase(args);
             obj.num_dims                = args.num_dims;
-            obj.num_agents              = args.num_agents;
             obj.state_vector            = args.state_vector;
             obj.state_covmat            = args.state_covmat;
             obj.process_noise_covmat    = args.process_noise_covmat;
@@ -80,33 +79,8 @@ classdef InformationFilterBase < handle
             this.state_vector = arg;
         end
 
-        function setStateCovarianceMatrix(this, args)
-            P = zeros(size(this.state_covmat));
-            num_dims = this.num_dims;
-            for iAgents = 1:this.num_agents
-                for iDims = 1:num_dims
-                    P(2*num_dims*(iAgents-1)+iDims, 2*num_dims*(iAgents-1)+iDims) = args.position_sigma^2;
-                    P(2*num_dims*(iAgents-1)+num_dims+iDims, 2*num_dims*(iAgents-1)+num_dims+iDims) = args.velocity_sigma^2;
-                end
-            end
-            this.state_covmat = P;
-        end
-
         function setStateCovarianceMatrixAll(this, state_covmat)
             this.state_covmat = state_covmat;
-        end
-
-        function setDiscreteSystemMatrix(this, discrete_system_matrix)
-            num_agents = this.num_agents;
-            num_vars = this.num_variables;
-            num_dims = this.num_dims;
-            Ad = zeros(num_vars, num_vars);
-            for iAgents = 1:num_agents
-                Ad(1+2*num_dims*(iAgents-1):2*num_dims*iAgents,...
-                    1+2*num_dims*(iAgents-1):2*num_dims*iAgents)...
-                = discrete_system_matrix;
-            end
-            this.discrete_system_matrix = Ad;
         end
 
         % Getters -------------------------------------------------------
