@@ -9,10 +9,22 @@ classdef PF_LinearDynamics < ParticleFilterBase
     methods
         function obj = PF_LinearDynamics(args)
             obj@ParticleFilterBase(args);
+            obj.checkConstructorArguments_PF_LinearDynamics(args);
+            obj.num_dimensions = args.num_dimensions;
             obj.discrete_system_matrix = args.discrete_system_matrix;
             obj.process_noise_covmat = args.process_noise_covmat;
             obj.direct_roughening_covmat = args.direct_roughening_covmat;
-            obj.num_dimensions = args.num_dimensions;
+        end
+
+        function checkConstructorArguments_PF_LinearDynamics(this, args)
+            disp("Check constructor arguments for PF_LinearDynamics");
+            num_vars = this.number_variables;
+            assert(isequal(size(args.discrete_system_matrix), [num_vars, num_vars]), ...
+                "discrete_system_matrix is NOT correct size matrix");
+            assert(isequal(size(args.process_noise_covmat), [num_vars, num_vars]), ...
+                "process_noise_covmat is NOT correct size matrix");
+            assert(isequal(size(args.direct_roughening_covmat), [num_vars, num_vars]), ...
+                "direct_roughening_covmat is NOT correct size matrix");
         end
 
         function output = propagateParticleStates(this)

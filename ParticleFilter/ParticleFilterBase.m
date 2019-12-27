@@ -13,6 +13,7 @@ classdef ParticleFilterBase < handle
         function obj = ParticleFilterBase(args)
             obj.number_particles = args.number_particles;
             obj.number_variables = args.number_variables;
+            obj.checkConstructorArguments_ParticleFilterBase(args);
             obj.estimated_state = zeros(obj.number_variables, 1);
             obj.weights = zeros(args.number_particles, 1);
             for iParticles = 1:obj.number_particles
@@ -24,6 +25,15 @@ classdef ParticleFilterBase < handle
             obj.resample_percentage = args.resample_percentage;
             obj.setInitialParticleStates(...
                 args.init_state_vector, args.init_state_covmat);
+        end
+
+        function checkConstructorArguments_ParticleFilterBase(this, args)
+            disp("Check constructor arguments for ParticleFilterBase");
+            num_vars = this.number_variables;
+            assert(isequal(size(args.init_state_vector), [num_vars, 1]), ...
+                "init_state_vector is NOT correct size matrix");
+            assert(isequal(size(args.process_noise_covmat), [num_vars, num_vars]), ...
+                "init_state_covmat is NOT correct size matrix");
         end
 
         function executeParticleFiltering(this, measurements)
