@@ -1,9 +1,15 @@
-classdef EIF_FormationEstimationByRange < ExtendedInformationFilter
+classdef EIF_FormationEstimationByRange < ...
+    ExtendedInformationFilter & ...
+    MultiagentUtilityBase
+
+    properties (SetAccess = immutable)
+        num_agents          % Number of agents in the formation
+        num_dimensions      % Number of dimensions (2D or 3D)
+    end
     
     properties (SetAccess = private)
         range_              % Instance of RangeMeasurementInterAgents class
         position_sensor_    % Instance of PositionMeasurementMultiAgents class
-        num_agents
     end
 
     methods (Access = public)
@@ -13,10 +19,11 @@ classdef EIF_FormationEstimationByRange < ExtendedInformationFilter
             obj.range_                  = RangeMeasurementInterAgents(args.rmia);
             obj.position_sensor_        = PositionMeasurementMultiAgents(args.pmb);
             obj.num_agents              = args.num_agents;
+            obj.num_dimensions          = args.num_dimensions;
             obj.state_vector            = args.state_vector;
             obj.process_noise_covmat    = args.process_noise_covmat;
-            obj.setStateCovarianceMatrix(args.sigma_position, args.sigma_velocity);
-            obj.setDiscreteSystemMatrix(args.discrete_system_matrix);
+            obj.discrete_system_matrix  = obj.createDiscreteSystemMatrix(args.discrete_system_matrix);
+            obj.state_covmat            = obj.createStateCovarianceMatrix(args.sigma_position, args.sigma_velocity);
         end
     end
 
@@ -59,33 +66,6 @@ classdef EIF_FormationEstimationByRange < ExtendedInformationFilter
                 obs_matrix_pos, obs_covmat_pos, measures.positions, measures_predicted_pos);
 
             this.convertInformationToMomentsForm();
-        end
-
-        % Setters -------------------------------------------
-        function setStateCovarianceMatrix(this, sigma_position, sigma_velocity)
-            num_dims = this.num_dimensions;
-            num_vars = this.num_variables;
-            P = zeros(num_vars, num_vars);
-            for iAgents = 1:this.num_agents
-                for iDims = 1:num_dims
-                    P(2*num_dims*(iAgents-1)+iDims, 2*num_dims*(iAgents-1)+iDims) = sigma_position^2;
-                    P(2*num_dims*(iAgents-1)+num_dims+iDims, 2*num_dims*(iAgents-1)+num_dims+iDims) = sigma_velocity^2;
-                end
-            end
-            this.state_covmat = P;
-        end
-
-        function setDiscreteSystemMatrix(this, discrete_system_matrix)
-            num_agents = this.num_agents;
-            num_vars = this.num_variables;
-            num_dims = this.num_dimensions;
-            Ad = zeros(num_vars, num_vars);
-            for iAgents = 1:num_agents
-                Ad(1+2*num_dims*(iAgents-1):2*num_dims*iAgents,...
-                    1+2*num_dims*(iAgents-1):2*num_dims*iAgents)...
-                = discrete_system_matrix;
-            end
-            this.discrete_system_matrix = Ad;
         end
 
         % Getters -------------------------------------------

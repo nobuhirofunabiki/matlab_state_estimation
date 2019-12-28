@@ -1,7 +1,6 @@
 classdef InformationFilterBase < handle
     properties (SetAccess = protected)
         num_variables           % Number of variables
-        num_dimensions          % Number of dimensions (2D or 3D)
         state_vector            % x(k): State vector
         state_covmat            % P(k): Covariance matrix of state
         process_noise_covmat    % Q(k): Covariance matrix of process noise
@@ -14,7 +13,6 @@ classdef InformationFilterBase < handle
         function obj = InformationFilterBase(args)
             num_vars                    = args.num_variables;
             obj.num_variables           = num_vars;
-            obj.num_dimensions          = args.num_dimensions;
             obj.info_vector             = zeros(num_vars, 1);
             obj.info_matrix             = zeros(num_vars, num_vars);
         end
