@@ -1,17 +1,25 @@
 classdef EIF_TargetTrackingRangeLandmarks < ExtendedInformationFilter
     properties (SetAccess = protected)
         range_sensor_;      % Class instance of RangeMeasurementLandmarks
+        state_vector        % x(k): State vector
+        state_covmat        % P(k): Covariance matrix of state
+    end
+    properties (SetAccess = immutable)
+        process_noise_covmat
+        discrete_system_matrix
+        num_dimensions
     end
 
     methods (Access = public)
         function obj = EIF_TargetTrackingRangeLandmarks(args)
-            obj@ExtendedInformationFilter(args.eif);
+            obj@ExtendedInformationFilter(args);
             obj.checkConstructorArguments(args);
             obj.range_sensor_           = RangeMeasurementLandmarks(args.rml);
             obj.state_vector            = args.state_vector;
             obj.state_covmat            = args.state_covmat;
             obj.process_noise_covmat    = args.process_noise_covmat;
             obj.discrete_system_matrix  = args.discrete_system_matrix;
+            obj.num_dimensions          = args.num_dimensions;
         end
 
         function executeInformationFilter(this, measures)

@@ -1,29 +1,41 @@
 classdef PF_TargetTrackingRangeLandmarks < PF_LinearDynamics
-    properties (SetAccess = immutable)
-        num_agents
-        init_state_covmat
-    end
+    
 
     properties (SetAccess = protected)
         range_sensor_       % Class instance of RangeMeasurementLandmarks
         counter
+        discrete_system_matrix
+        process_noise_covmat
+        direct_roughening_covmat
+    end
+    properties (SetAccess = immutable)
+        num_dimensions
+        num_agents
+        init_state_vector
+        init_state_covmat
     end
 
     methods (Access = public)
         function obj = PF_TargetTrackingRangeLandmarks(args)
-            obj@PF_LinearDynamics(args.pf);
+            obj@PF_LinearDynamics(args);
             obj.checkConstructorArguments(args);
-            obj.num_agents          = args.num_agents;
-            obj.init_state_covmat   = args.pf.init_state_covmat;
-            obj.range_sensor_       = RangeMeasurementLandmarks(args.rml);
-            obj.counter             = 0;
+            obj.range_sensor_               = RangeMeasurementLandmarks(args.rml);
+            obj.counter                     = 0;
+            obj.discrete_system_matrix      = args.discrete_system_matrix;
+            obj.process_noise_covmat        = args.process_noise_covmat;
+            obj.direct_roughening_covmat    = args.direct_roughening_covmat;
+            obj.num_dimensions              = args.num_dimensions;
+            obj.num_agents                  = args.num_agents;
+            obj.init_state_vector           = args.init_state_vector;
+            obj.init_state_covmat           = args.init_state_covmat;
+            obj.setInitialParticleStates();
         end
     end
 
     methods (Access = private)
         function checkConstructorArguments(this, args)
             disp("Check constructor arguments for PF_TargetTrackingRangeLandmarks");
-            assert(isequal(size(args.pf.init_state_covmat), [this.number_variables, this.number_variables]), ...
+            assert(isequal(size(args.init_state_covmat), [this.number_variables, this.number_variables]), ...
                 "init_state_covmat is NOT correct size matrix");
         end
     end
@@ -45,7 +57,7 @@ classdef PF_TargetTrackingRangeLandmarks < PF_LinearDynamics
     methods (Access = protected)
         function updateParticleWeights(this, measurements)
             for iParticles = 1:this.number_particles
-                NUM_DIMS = this.getNumberDimensions();
+                NUM_DIMS = this.num_dimensions;
                 position = this.particle_states(1:NUM_DIMS, iParticles);
                 this.range_sensor_.setMeasurementVectorWithoutNoise(position);
                 predicted_measurements = this.range_sensor_.getMeasurements();
@@ -60,7 +72,7 @@ classdef PF_TargetTrackingRangeLandmarks < PF_LinearDynamics
         end
 
         function setParticleStatesOnlyVelocity(this)
-            num_dims = this.getNumberDimensions();
+            num_dims = this.num_dimensions;
             for iParticles = 1:this.number_particles
                 particle_states = mvnrnd(this.particle_states(:,iParticles), this.init_state_covmat);
                 for iAgents = 1:this.num_agents

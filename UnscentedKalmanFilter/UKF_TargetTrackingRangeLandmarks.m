@@ -5,7 +5,7 @@ classdef UKF_TargetTrackingRangeLandmarks < UKF_LinearDynamics
 
     methods (Access = public)
         function obj = UKF_TargetTrackingRangeLandmarks(args)
-            obj@UKF_LinearDynamics(args.ukf);
+            obj@UKF_LinearDynamics(args);
             obj.range_sensor_ = RangeMeasurementLandmarks(args.rml);
         end
     end
