@@ -5,22 +5,26 @@ classdef PF_TargetTrackingRangeLandmarks < PF_LinearDynamics & RangeMeasurementL
         counter
     end
 
-    methods
+    methods (Access = public)
         function obj = PF_TargetTrackingRangeLandmarks(args)
             obj@PF_LinearDynamics(args.pf);
             obj@RangeMeasurementLandmarks(args.rml);
-            obj.checkConstructorArguments_PF_TargetTrackingRangeLandmarks(args);
-            obj.num_agents = args.num_agents;
-            obj.init_state_covmat = args.pf.init_state_covmat;
-            obj.counter = 0;
+            obj.checkConstructorArguments(args);
+            obj.num_agents          = args.num_agents;
+            obj.init_state_covmat   = args.pf.init_state_covmat;
+            obj.counter             = 0;
         end
+    end
 
-        function checkConstructorArguments_PF_TargetTrackingRangeLandmarks(this, args)
+    methods (Access = private)
+        function checkConstructorArguments(this, args)
             disp("Check constructor arguments for PF_TargetTrackingRangeLandmarks");
             assert(isequal(size(args.pf.init_state_covmat), [this.number_variables, this.number_variables]), ...
                 "init_state_covmat is NOT correct size matrix");
         end
+    end
 
+    methods (Access = public)
         function executeParticleFiltering(this, measurements)
             this.updateParticles(measurements);
             this.resampleParticles();
@@ -32,7 +36,9 @@ classdef PF_TargetTrackingRangeLandmarks < PF_LinearDynamics & RangeMeasurementL
             this.computeEstimatedStates();
             this.prepareForNextFiltering();
         end
+    end
 
+    methods (Access = protected)
         function updateParticleWeights(this, measurements)
             for iParticles = 1:this.number_particles
                 NUM_DIMS = this.getNumberDimensions();

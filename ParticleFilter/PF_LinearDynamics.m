@@ -10,10 +10,10 @@ classdef PF_LinearDynamics < ParticleFilterBase
         function obj = PF_LinearDynamics(args)
             obj@ParticleFilterBase(args);
             obj.checkConstructorArguments(args);
-            obj.num_dimensions = args.num_dimensions;
-            obj.discrete_system_matrix = args.discrete_system_matrix;
-            obj.process_noise_covmat = args.process_noise_covmat;
-            obj.direct_roughening_covmat = args.direct_roughening_covmat;
+            obj.num_dimensions              = args.num_dimensions;
+            obj.discrete_system_matrix      = args.discrete_system_matrix;
+            obj.process_noise_covmat        = args.process_noise_covmat;
+            obj.direct_roughening_covmat    = args.direct_roughening_covmat;
         end
     end
 

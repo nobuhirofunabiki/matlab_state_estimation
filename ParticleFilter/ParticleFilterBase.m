@@ -9,11 +9,11 @@ classdef ParticleFilterBase < handle
         resample_percentage
     end
 
-    methods
+    methods (Access = protected)
         function obj = ParticleFilterBase(args)
             obj.number_particles = args.number_particles;
             obj.number_variables = args.number_variables;
-            obj.checkConstructorArguments_ParticleFilterBase(args);
+            obj.checkConstructorArguments(args);
             obj.estimated_state = zeros(obj.number_variables, 1);
             obj.weights = zeros(args.number_particles, 1);
             for iParticles = 1:obj.number_particles
@@ -26,8 +26,10 @@ classdef ParticleFilterBase < handle
             obj.setInitialParticleStates(...
                 args.init_state_vector, args.init_state_covmat);
         end
+    end
 
-        function checkConstructorArguments_ParticleFilterBase(this, args)
+    methods (Access = private)
+        function checkConstructorArguments(this, args)
             disp("Check constructor arguments for ParticleFilterBase");
             num_vars = this.number_variables;
             assert(isequal(size(args.init_state_vector), [num_vars, 1]), ...
@@ -35,7 +37,14 @@ classdef ParticleFilterBase < handle
             assert(isequal(size(args.process_noise_covmat), [num_vars, num_vars]), ...
                 "init_state_covmat is NOT correct size matrix");
         end
+    end
 
+    methods (Abstract, Access = protected)
+        propagateParticleStates(this);
+        updateParticleWeights(this);
+    end
+
+    methods (Access = public)
         function executeParticleFiltering(this, measurements)
             this.updateParticles(measurements);
             this.resampleParticles();
@@ -43,6 +52,21 @@ classdef ParticleFilterBase < handle
             this.prepareForNextFiltering();
         end
 
+        % Getters -------------------------------------------------------
+        function output = getStateVector(this)
+            output = this.estimated_state;
+        end
+
+        function output = getParticleNumber(this);
+            output = this.number_particles;
+        end
+
+        function output = getParticleStates(this)
+            output = this.particle_states;
+        end
+    end
+
+    methods (Access = protected)
         function updateParticles(this, measurements)
             this.propagateParticleStates();
             this.updateParticleWeights(measurements);
@@ -100,18 +124,5 @@ classdef ParticleFilterBase < handle
             end
         end
 
-        % Getters -------------------------------------------------------
-
-        function output = getStateVector(this)
-            output = this.estimated_state;
-        end
-
-        function output = getParticleNumber(this);
-            output = this.number_particles;
-        end
-
-        function output = getParticleStates(this)
-            output = this.particle_states;
-        end
     end
 end
