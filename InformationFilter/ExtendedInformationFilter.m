@@ -1,6 +1,7 @@
 classdef ExtendedInformationFilter < InformationFilterBase
-    properties (SetAccess = protected)
-        
+    properties (Abstract = true, SetAccess = immutable)
+        process_noise_covmat
+        discrete_system_matrix
     end
 
     methods (Access = protected)
@@ -10,6 +11,13 @@ classdef ExtendedInformationFilter < InformationFilterBase
     end
 
     methods (Access = protected)
+        function predictStateVectorAndCovariance(this)
+            Ad = this.discrete_system_matrix;
+            Q = this.process_noise_covmat;
+            this.state_vector = Ad*this.state_vector;
+            this.state_covmat = Ad*this.state_covmat*Ad.' + Q;
+        end
+
         function addObservationInformation(this, ...
             obs_matrix, obs_covmat, measures, measures_predicted)
             H = obs_matrix;

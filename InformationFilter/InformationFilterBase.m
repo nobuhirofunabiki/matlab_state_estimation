@@ -1,12 +1,14 @@
 classdef InformationFilterBase < handle
-    properties (SetAccess = protected)
+    properties (SetAccess = immutable)
         num_variables           % Number of variables
-        state_vector            % x(k): State vector
-        state_covmat            % P(k): Covariance matrix of state
-        process_noise_covmat    % Q(k): Covariance matrix of process noise
+    end
+    properties (SetAccess = protected)
         info_vector             % xi(k): Information vector
         info_matrix             % Sigma(k): Information matrix
-        discrete_system_matrix  % Ad(k): Discrete system matrix
+    end
+    properties (Abstract = true, SetAccess = protected)
+        state_vector            % x(k): State vector
+        state_covmat            % P(k): Covariance matrix of state
     end
 
     methods (Access = protected)
@@ -16,6 +18,10 @@ classdef InformationFilterBase < handle
             obj.info_vector             = zeros(num_vars, 1);
             obj.info_matrix             = zeros(num_vars, num_vars);
         end
+    end
+
+    methods (Abstract = true, Access = protected)
+        predictStateVectorAndCovariance(this);
     end
 
     methods (Access = public)
@@ -29,13 +35,6 @@ classdef InformationFilterBase < handle
     end
 
     methods (Access = protected)
-        function predictStateVectorAndCovariance(this)
-            Ad = this.discrete_system_matrix;
-            Q = this.process_noise_covmat;
-            this.state_vector = Ad*this.state_vector;
-            this.state_covmat = Ad*this.state_covmat*Ad.' + Q;
-        end
-
         function addObservationInformation(this, obs_matrix, obs_covmat, measures)
             H = obs_matrix;
             R = obs_covmat;

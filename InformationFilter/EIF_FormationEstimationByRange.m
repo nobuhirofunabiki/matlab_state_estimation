@@ -3,20 +3,28 @@ classdef EIF_FormationEstimationByRange < ...
     MultiagentUtilityBase
 
     properties (SetAccess = immutable)
-        num_agents          % Number of agents in the formation
-        num_dimensions      % Number of dimensions (2D or 3D)
+        % Abstract properties of ExtendedInformationFilter
+        process_noise_covmat
+        discrete_system_matrix
+        % Abstract properties of MultiagentUtilityBase
+        num_agents
+        num_dimensions
     end
-    
+    properties (SetAccess = protected)
+        % Abstract properties of InformationFilterBase
+        state_vector
+        state_covmat
+    end
     properties (SetAccess = private)
-        range_              % Instance of RangeMeasurementInterAgents class
+        range_sensor_       % Instance of RangeMeasurementInterAgents class
         position_sensor_    % Instance of PositionMeasurementMultiAgents class
     end
 
     methods (Access = public)
         function obj = EIF_FormationEstimationByRange(args)
-            obj@ExtendedInformationFilter(args.eif);
+            obj@ExtendedInformationFilter(args);
             obj.checkConstructorArguments(args);
-            obj.range_                  = RangeMeasurementInterAgents(args.rmia);
+            obj.range_sensor_           = RangeMeasurementInterAgents(args.rmia);
             obj.position_sensor_        = PositionMeasurementMultiAgents(args.pmb);
             obj.num_agents              = args.num_agents;
             obj.num_dimensions          = args.num_dimensions;
@@ -47,12 +55,12 @@ classdef EIF_FormationEstimationByRange < ...
             positions = this.getPositionVector();
 
             % Range measurements
-            this.range_.calculateMeasurementVectorWithoutNoise(positions);
-            this.range_.setObservationMatrix(positions);
-            this.range_.updateMeasurementCovarianceMatrix(adjacent_matrix);
-            obs_matrix_range = this.range_.getObservationMatrix();
-            obs_covmat_range = this.range_.getMeasureCovarinaceMatrix();
-            measures_predicted_range = this.range_.getMeasurements();
+            this.range_sensor_.calculateMeasurementVectorWithoutNoise(positions);
+            this.range_sensor_.setObservationMatrix(positions);
+            this.range_sensor_.updateMeasurementCovarianceMatrix(adjacent_matrix);
+            obs_matrix_range = this.range_sensor_.getObservationMatrix();
+            obs_covmat_range = this.range_sensor_.getMeasureCovarinaceMatrix();
+            measures_predicted_range = this.range_sensor_.getMeasurements();
             this.addObservationInformation(...
                 obs_matrix_range, obs_covmat_range, measures.ranges, measures_predicted_range);
             
