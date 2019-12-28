@@ -4,13 +4,15 @@ classdef UKF_LinearDynamics < UnscentedKalmanFilterBase
         process_noise_covmat 
     end
 
-    methods
+    methods (Access = protected)
         function obj = UKF_LinearDynamics(args)
             obj@UnscentedKalmanFilterBase(args);
             obj.discrete_system_matrix = args.discrete_system_matrix;
             obj.process_noise_covmat = args.process_noise_covmat;
         end
+    end
 
+    methods (Access = protected)
         function predictStates(this)
             num_sigma_points = size(this.sigma_points, 2);
             state_est_prior = zeros(size(this.state_est));

@@ -18,7 +18,7 @@ classdef UnscentedKalmanFilterBase < handle
         z_pred
     end
 
-    methods
+    methods (Access = protected)
         function obj = UnscentedKalmanFilterBase(args)
             obj.alpha       = args.alpha;
             obj.beta        = args.beta;
@@ -45,14 +45,23 @@ classdef UnscentedKalmanFilterBase < handle
             % Set sigma points
             obj.generateSigmaPoints();
         end
+    end
 
+    methods (Abstract, Access = protected)
+        predictStates(this);
+        updateByMeasurement(this);
+    end
+
+    methods (Access = protected)
         function generateSigmaPoints(this)
             A = this.gamma * chol(this.state_cov).';
             x = this.state_est;
             Y = x(:,ones(1,numel(x)));
             this.sigma_points = [x Y+A Y-A];
         end
+    end
 
+    methods (Access = public)
         function executeUnscentedKalmanFilter(this, measurements)
             this.generateSigmaPoints();
             this.predictStates();
