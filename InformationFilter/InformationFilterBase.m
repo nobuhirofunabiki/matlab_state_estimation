@@ -10,7 +10,7 @@ classdef InformationFilterBase < handle
         discrete_system_matrix  % Ad(k): Discrete system matrix
     end
 
-    methods
+    methods (Access = protected)
         function obj = InformationFilterBase(args)
             num_vars                    = args.num_variables;
             obj.num_variables           = num_vars;
@@ -18,7 +18,9 @@ classdef InformationFilterBase < handle
             obj.info_vector             = zeros(num_vars, 1);
             obj.info_matrix             = zeros(num_vars, num_vars);
         end
+    end
 
+    methods (Access = public)
         function executeInformationFilter(this, args)
             this.predictStateVectorAndCovariance();
             this.convertMomentsToInformationForm();
@@ -26,7 +28,9 @@ classdef InformationFilterBase < handle
                 args.obs_matrix, args.obs_covmat, args.measures);
             this.convertInformationToMomentsForm();
         end
+    end
 
+    methods (Access = protected)
         function predictStateVectorAndCovariance(this)
             Ad = this.discrete_system_matrix;
             Q = this.process_noise_covmat;
@@ -51,7 +55,9 @@ classdef InformationFilterBase < handle
             this.state_covmat = inv(this.info_matrix);
             this.state_vector = this.state_covmat * this.info_vector;
         end
+    end
 
+    methods (Access = public)
         % Setters-------------------------------------------------------
         function setEstimatedVariable(this, index_begin, index_end, arg_variable)
             this.state_vector(index_begin:index_end, 1) = arg_variable;
@@ -74,4 +80,5 @@ classdef InformationFilterBase < handle
             output = this.state_covmat;
         end
     end
+    
 end

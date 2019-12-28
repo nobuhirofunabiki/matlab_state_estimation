@@ -3,19 +3,13 @@ classdef ExtendedInformationFilter < InformationFilterBase
         
     end
 
-    methods
+    methods (Access = protected)
         function obj = ExtendedInformationFilter(args)
             obj@InformationFilterBase(args);
         end
+    end
 
-        function executeInformationFilter(this, args)
-            this.predictStateVectorAndCovariance();
-            this.convertMomentsToInformationForm();
-            this.addObservationInformation(...
-                args.obs_matrix, args.obs_covmat, args.measures, args.measures_predicted);
-            this.convertInformationToMomentsForm();
-        end
-
+    methods (Access = protected)
         function addObservationInformation(this, ...
             obs_matrix, obs_covmat, measures, measures_predicted)
             H = obs_matrix;
