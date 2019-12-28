@@ -40,7 +40,7 @@ classdef EIF_FormationEstimationByRange < ExtendedInformationFilter
             positions = this.getPositionVector();
 
             % Range measurements
-            this.range_.calculateMeasurementVector(positions);
+            this.range_.calculateMeasurementVectorWithoutNoise(positions);
             this.range_.setObservationMatrix(positions);
             this.range_.updateMeasurementCovarianceMatrix(adjacent_matrix);
             obs_matrix_range = this.range_.getObservationMatrix();
@@ -52,8 +52,8 @@ classdef EIF_FormationEstimationByRange < ExtendedInformationFilter
             % Position measurements
             % TODO: Should I use the linear version for addObservationInformation?
             this.position_sensor_.computeMeasurementVector(positions, false);
-            obs_matrix_pos = this.position_sensor_.getObservationMatrix;
-            obs_covmat_pos = this.position_sensor_.getMeasureCovarinaceMatrix;
+            obs_matrix_pos = this.position_sensor_.getObservationMatrix();
+            obs_covmat_pos = this.position_sensor_.getMeasureCovarinaceMatrix();
             measures_predicted_pos = this.position_sensor_.getMeasurements();
             this.addObservationInformation(...
                 obs_matrix_pos, obs_covmat_pos, measures.positions, measures_predicted_pos);
