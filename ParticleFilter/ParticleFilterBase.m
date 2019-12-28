@@ -2,7 +2,7 @@ classdef ParticleFilterBase < handle
     properties (SetAccess = protected)
         number_particles
         number_variables
-        estimated_state;
+        estimated_state
         weights
         particle_states
         prior_particle_states

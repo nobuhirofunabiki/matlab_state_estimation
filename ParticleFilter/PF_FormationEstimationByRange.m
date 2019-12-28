@@ -77,8 +77,8 @@ classdef PF_FormationEstimationByRange < ...
 
         function updateParticleWeights(this, measurements, adjacent_matrix)
             for iParticles = 1:this.number_particles
-                NUM_DIMS = this.getNumberDimensions();
-                positions = this.particle_states(1:NUM_DIMS, iParticles);
+                NUM_DIMS = this.num_dimensions();
+                positions = this.getPositionVector(iParticles);
 
                 % Range measurements
                 this.range_sensor_.calculateMeasurementVectorWithoutNoise(positions);
@@ -116,7 +116,7 @@ classdef PF_FormationEstimationByRange < ...
 
     methods (Access = private)
         function setParticleStatesOnlyVelocity(this)
-            num_dims = this.getNumberDimensions();
+            num_dims = this.num_dimensions;
             for iParticles = 1:this.number_particles
                 particle_states = mvnrnd(this.particle_states(:,iParticles), this.init_state_covmat);
                 for iAgents = 1:this.num_agents
@@ -125,6 +125,15 @@ classdef PF_FormationEstimationByRange < ...
                             = particle_states(2*num_dims*(iAgents-1)+num_dims+iDims);
                     end
                 end
+            end
+        end
+
+        function output = getPositionVector(this, iParticles)
+            num_dims = this.num_dimensions;
+            output = zeros(num_dims*this.num_agents,1);
+            for iAgents = 1:this.num_agents
+                output(num_dims*(iAgents-1)+1:num_dims*iAgents,1) ...
+                    = this.particle_states(2*num_dims*(iAgents-1)+1:2*num_dims*(iAgents-1)+num_dims,iParticles);
             end
         end
     end
