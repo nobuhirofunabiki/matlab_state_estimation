@@ -3,17 +3,20 @@ classdef ParticleFilterBase < handle
         number_particles
         number_variables
         estimated_state;
-        weights % importance factor
+        weights
         particle_states
         prior_particle_states
         resample_percentage
+    end
+    properties (Abstract = true, SetAccess = immutable)
+        init_state_vector
+        init_state_covmat
     end
 
     methods (Access = protected)
         function obj = ParticleFilterBase(args)
             obj.number_particles = args.number_particles;
             obj.number_variables = args.number_variables;
-            obj.checkConstructorArguments(args);
             obj.estimated_state = zeros(obj.number_variables, 1);
             obj.weights = zeros(args.number_particles, 1);
             for iParticles = 1:obj.number_particles
@@ -23,23 +26,10 @@ classdef ParticleFilterBase < handle
                 zeros(args.number_variables, args.number_particles);
             obj.prior_particle_states = zeros(size(obj.particle_states));
             obj.resample_percentage = args.resample_percentage;
-            obj.setInitialParticleStates(...
-                args.init_state_vector, args.init_state_covmat);
         end
     end
 
-    methods (Access = private)
-        function checkConstructorArguments(this, args)
-            disp("Check constructor arguments for ParticleFilterBase");
-            num_vars = this.number_variables;
-            assert(isequal(size(args.init_state_vector), [num_vars, 1]), ...
-                "init_state_vector is NOT correct size matrix");
-            assert(isequal(size(args.process_noise_covmat), [num_vars, num_vars]), ...
-                "init_state_covmat is NOT correct size matrix");
-        end
-    end
-
-    methods (Abstract, Access = protected)
+    methods (Abstract = true, Access = protected)
         propagateParticleStates(this);
         updateParticleWeights(this);
     end
@@ -117,10 +107,10 @@ classdef ParticleFilterBase < handle
 
         % Setters -------------------------------------------------------
 
-        function setInitialParticleStates(this, init_state_vector, init_state_covmat)
+        function setInitialParticleStates(this)
             for iParticles = 1:this.number_particles
                 this.prior_particle_states(:,iParticles) = ...
-                    mvnrnd(init_state_vector, init_state_covmat);
+                    mvnrnd(this.init_state_vector, this.init_state_covmat);
             end
         end
 
