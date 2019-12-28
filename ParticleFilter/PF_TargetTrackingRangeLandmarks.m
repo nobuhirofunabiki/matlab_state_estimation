@@ -1,17 +1,21 @@
-classdef PF_TargetTrackingRangeLandmarks < PF_LinearDynamics & RangeMeasurementLandmarks
-    properties (SetAccess = protected)
+classdef PF_TargetTrackingRangeLandmarks < PF_LinearDynamics
+    properties (SetAccess = immutable)
         num_agents
         init_state_covmat
+    end
+
+    properties (SetAccess = protected)
+        range_sensor_       % Class instance of RangeMeasurementLandmarks
         counter
     end
 
     methods (Access = public)
         function obj = PF_TargetTrackingRangeLandmarks(args)
             obj@PF_LinearDynamics(args.pf);
-            obj@RangeMeasurementLandmarks(args.rml);
             obj.checkConstructorArguments(args);
             obj.num_agents          = args.num_agents;
             obj.init_state_covmat   = args.pf.init_state_covmat;
+            obj.range_sensor_       = RangeMeasurementLandmarks(args.rml);
             obj.counter             = 0;
         end
     end
@@ -43,10 +47,10 @@ classdef PF_TargetTrackingRangeLandmarks < PF_LinearDynamics & RangeMeasurementL
             for iParticles = 1:this.number_particles
                 NUM_DIMS = this.getNumberDimensions();
                 position = this.particle_states(1:NUM_DIMS, iParticles);
-                this.setMeasurementVectorWithoutNoise(position);
-                predicted_measurements = this.getMeasurements();
+                this.range_sensor_.setMeasurementVectorWithoutNoise(position);
+                predicted_measurements = this.range_sensor_.getMeasurements();
                 diff_measurements = transpose(measurements - predicted_measurements);
-                obs_covmat = this.getMeasureCovarinaceMatrix();
+                obs_covmat = this.range_sensor_.getMeasureCovarinaceMatrix();
                 for iMeasures = 1:length(diff_measurements)
                     noise_sigma = sqrt(obs_covmat(iMeasures, iMeasures));
                     likelihood = normpdf(diff_measurements(1,iMeasures), 0, noise_sigma);
