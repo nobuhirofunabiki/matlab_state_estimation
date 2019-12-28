@@ -2,7 +2,7 @@ classdef EIF_FormationEstimationByRange < ExtendedInformationFilter
     
     properties (SetAccess = private)
         range_              % Instance of RangeMeasurementInterAgents class
-        position_sensor_    % Instance of PositionMeasurementBase class
+        position_sensor_    % Instance of PositionMeasurementMultiAgents class
         num_agents
     end
 
@@ -50,6 +50,7 @@ classdef EIF_FormationEstimationByRange < ExtendedInformationFilter
                 obs_matrix_range, obs_covmat_range, measures.ranges, measures_predicted_range);
             
             % Position measurements
+            % TODO: Should I use the linear version for addObservationInformation?
             this.position_sensor_.computeMeasurementVector(positions, false);
             obs_matrix_pos = this.position_sensor_.getObservationMatrix;
             obs_covmat_pos = this.position_sensor_.getMeasureCovarinaceMatrix;

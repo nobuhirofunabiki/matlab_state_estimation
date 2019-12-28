@@ -21,9 +21,9 @@ classdef DIF_FormationEstimationByRange < DIF_LinearDynamics
             this.range_sensor_.calculateMeasurementVector(positions);
             this.range_sensor_.setObservationMatrix(positions);
             this.range_sensor_.updateMeasurementCovarianceMatrix(adjacent_matrix);
-            obs_matrix_range = this.range_.getObservationMatrix();
-            obs_covmat_range = this.range_.getMeasureCovarinaceMatrix();
-            measures_predicted_range = this.range_.getMeasurements();
+            obs_matrix_range = this.range_sensor_.getObservationMatrix();
+            obs_covmat_range = this.range_sensor_.getMeasureCovarinaceMatrix();
+            measures_predicted_range = this.range_sensor_.getMeasurements();
             this.addObservationInformationRange(...
                 obs_matrix_range, obs_covmat_range, measures.ranges, measures_predicted_range);
             
@@ -42,7 +42,7 @@ classdef DIF_FormationEstimationByRange < DIF_LinearDynamics
             obs_matrix, obs_covmat, measures, measures_predicted)
             H = obs_matrix;
             R = obs_covmat;
-            y = measured;
+            y = measures;
             y_hat = measures_predicted;
             x_hat = this.state_vector;
             this.obs_info_vector = this.obs_info_vector + H.'/R*(y - y_hat + H*x_hat);

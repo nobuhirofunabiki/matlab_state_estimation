@@ -50,10 +50,10 @@ classdef DistributedInformationFilterBase < handle
         end
     end
 
-    % methods (Abstract, Access = protected)
-    %     processMeasurements(this);
-    %     predictStateVectorAndCovariance(this);
-    % end
+    methods (Abstract, Access = protected)
+        processMeasurements(this);
+        predictStateVectorAndCovariance(this);
+    end
 
     methods (Access = public)
         function executeFiltering(this, measures, adjacent_matrix, ...
