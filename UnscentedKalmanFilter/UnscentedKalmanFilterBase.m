@@ -63,12 +63,12 @@ classdef UnscentedKalmanFilterBase < handle
         end
 
         % Getters ---------------------------------------------
-        function output = getStateEstimate(this)
+        function output = getStateVector(this)
             output = this.state_vector;
         end
     end
 
-    methods (Access = private)
+    methods (Access = protected)
         function generateSigmaPoints(this)
             A = this.gamma * chol(this.state_covmat).';
             x = this.state_vector;

@@ -22,12 +22,12 @@ classdef UKF_FormationEstimationByRange < ...
             obj@UKF_LinearDynamics(args);
             obj.range_sensor_           = RangeMeasurementInterAgents(args.rmia);
             obj.position_sensor_        = PositionMeasurementMultiAgents(args.pmb);
+            obj.num_dimensions          = args.num_dimensions;
+            obj.num_agents              = args.num_agents;
             obj.state_vector            = args.init_state_vector;
             obj.state_covmat            = obj.createStateCovarianceMatrix(args.sigma_position, args.sigma_velocity);
             obj.process_noise_covmat    = args.process_noise_covmat;
             obj.discrete_system_matrix  = obj.createDiscreteSystemMatrix(args.discrete_system_matrix);
-            obj.num_dimensions          = args.num_dimensions;
-            obj.num_agents              = args.num_agents;
         end
     end
 
@@ -58,10 +58,10 @@ classdef UKF_FormationEstimationByRange < ...
                 = this.position_sensor_.getMeasureCovarinaceMatrix();
             for iPoints = 1:num_sigma_points
                 positions = this.getPositionVector(iPoints);
-                this.range_sensor_.setMeasurementVectorWithoutNoise(positions);
+                this.range_sensor_.calculateMeasurementVectorWithoutNoise(positions);
                 this.position_sensor_.computeMeasurementVector(positions, false);
-                Z(1:num_ranges,iPoints)         = this.range_sensor_.getMeasurements();
-                Z(num_ranges+1:num_measures)    = this.position_sensor_.getMeasurements();
+                Z(1:num_ranges, iPoints)                 = this.range_sensor_.getMeasurements();
+                Z(num_ranges+1:num_measures, iPoints)    = this.position_sensor_.getMeasurements();
                 z_pred = z_pred + this.weights_mean(1,iPoints)*Z(:,iPoints);
             end
             this.z_pred = z_pred;
