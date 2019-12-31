@@ -81,7 +81,7 @@ classdef PF_FormationEstimationByRange < ...
                 positions = this.getPositionVector(iParticles);
 
                 % Range measurements
-                this.range_sensor_.calculateMeasurementVectorWithoutNoise(positions);
+                this.range_sensor_.computeMeasurementVector(positions, false);
                 this.range_sensor_.updateMeasurementCovarianceMatrix(adjacent_matrix);
                 predicted_range_measurements = this.range_sensor_.getMeasurements();
                 diff_range_measurements = transpose(measurements.ranges - predicted_range_measurements);

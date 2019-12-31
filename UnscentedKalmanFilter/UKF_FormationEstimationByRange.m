@@ -64,7 +64,7 @@ classdef UKF_FormationEstimationByRange < ...
                 = this.position_sensor_.getMeasureCovarinaceMatrix();
             for iPoints = 1:num_sigma_points
                 positions = this.getPositionVector(iPoints);
-                this.range_sensor_.calculateMeasurementVectorWithoutNoise(positions);
+                this.range_sensor_.computeMeasurementVector(positions, false);
                 this.position_sensor_.computeMeasurementVector(positions, false);
                 this.angle_sensor_.computeMeasurementVector(positions, false);
                 measures_predicted_angle = this.angle_sensor_.getMeasurements();

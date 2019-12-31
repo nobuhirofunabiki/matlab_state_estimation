@@ -72,8 +72,8 @@ classdef EIF_FormationEstimationByRangeAngleWithReference < ...
                 obs_matrix_range, obs_covmat_range, measures.ranges, measures_predicted_range);
             
             % Angle measurements
-            this.angle_sensor_.computeMeasurementVector(positions, false);
-            this.angle_sensor_.setObservationMatrix(positions);
+            this.angle_sensor_.computeMeasurementVector(positions, position_ref, false);
+            this.angle_sensor_.setObservationMatrix(positions, position_ref);
             this.angle_sensor_.setMeasurementCovarianceMatrix(adjacent_matrix.angle);
             obs_matrix_angle = this.angle_sensor_.getObservationMatrix();
             obs_covmat_angle = this.angle_sensor_.getMeasureCovarinaceMatrix();

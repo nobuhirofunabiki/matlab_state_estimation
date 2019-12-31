@@ -18,7 +18,7 @@ classdef DIF_FormationEstimationByRange < DIF_LinearDynamics
             positions = this.getPositionVector();
 
             % Range measurements
-            this.range_sensor_.calculateMeasurementVectorWithoutNoise(positions);
+            this.range_sensor_.computeMeasurementVector(positions, false);
             this.range_sensor_.setObservationMatrix(positions);
             this.range_sensor_.updateMeasurementCovarianceMatrix(adjacent_matrix);
             obs_matrix_range = this.range_sensor_.getObservationMatrix();
