@@ -10,7 +10,7 @@ classdef UKF_FormationEstimationByRange < ...
     end
     properties (SetAccess = private)
         range_sensor_       % Instance of RangeMeasurementInterAgents class
-        angle_sensor_       % Instance of AngleMeasurementMultiAgents class
+        angle_sensor_       % Instance of AngleMeasurementMultiAgentWithoutReference class
         position_sensor_    % Instance of PositionMeasurementMultiAgents class
     end
     properties (SetAccess = immutable)
@@ -21,9 +21,9 @@ classdef UKF_FormationEstimationByRange < ...
     methods (Access = public)
         function obj = UKF_FormationEstimationByRange(args)
             obj@UKF_LinearDynamics(args);
-            obj.range_sensor_           = RangeMeasurementInterAgents(args.rmia);
-            obj.angle_sensor_           = AngleMeasurementMultiAgents(args.angle);
-            obj.position_sensor_        = PositionMeasurementMultiAgents(args.pmb);
+            obj.range_sensor_           = RangeMeasurementInterAgents(args.range_sensor);
+            obj.angle_sensor_           = AngleMeasurementMultiAgentWithoutReference(args.angle_sensor);
+            obj.position_sensor_        = PositionMeasurementMultiAgents(args.position_sensor);
             obj.num_dimensions          = args.num_dimensions;
             obj.num_agents              = args.num_agents;
             obj.state_vector            = args.init_state_vector;

@@ -7,8 +7,8 @@ classdef DIF_FormationEstimationByRange < DIF_LinearDynamics
     methods (Access = public)
         function obj = DIF_FormationEstimationByRange(args)
             obj@DIF_LinearDynamics(args);
-            obj.range_sensor_       = RangeMeasurementInterAgents(args.rmia);
-            obj.position_sensor_    = PositionMeasurementMultiAgents(args.pmb);
+            obj.range_sensor_       = RangeMeasurementInterAgents(args.range_sensor);
+            obj.position_sensor_    = PositionMeasurementMultiAgents(args.position_sensor);
         end
     end
 
