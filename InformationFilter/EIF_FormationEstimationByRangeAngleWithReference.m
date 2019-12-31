@@ -58,8 +58,7 @@ classdef EIF_FormationEstimationByRangeAngleWithReference < ...
             num_dims = this.num_dimensions;
             num_agents = this.num_agents;
             id_ref = this.id_reference_agent;
-            % positions = this.getPositionVector();
-            positions = zeros(num_dims*num_agents, 1);
+            positions = this.getPositionVector();
 
             % Range measurements
             this.range_sensor_.computeMeasurementVector(positions, position_ref, false);
