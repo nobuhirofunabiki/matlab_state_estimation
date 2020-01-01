@@ -76,7 +76,7 @@ classdef DistributedInformationFilterBase < handle
         end
     end
 
-    methods (Access = private)
+    methods (Access = protected)
         function resetObservationInformation(this)
             this.obs_info_vector = zeros(size(this.obs_info_vector));
             this.obs_info_matrix = zeros(size(this.obs_info_matrix));
