@@ -31,7 +31,7 @@ classdef UKF_TargetTrackingRangeLandmarks < UKF_LinearDynamics
             for iPoints = 1:num_sigma_points
                 % TODO: only for 2D
                 position = this.sigma_points(1:2, iPoints);
-                this.range_sensor_.setMeasurementVectorWithoutNoise(position);
+                this.range_sensor_.computeMeasurementVector(position, false);
                 Z(:,iPoints) = this.range_sensor_.getMeasurements();
                 z_pred = z_pred + this.weights_mean(1,iPoints)*Z(:,iPoints);
             end

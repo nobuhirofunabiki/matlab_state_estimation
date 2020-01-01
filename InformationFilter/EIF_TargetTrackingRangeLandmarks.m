@@ -24,7 +24,7 @@ classdef EIF_TargetTrackingRangeLandmarks < ExtendedInformationFilter
 
         function executeInformationFilter(this, measures)
             this.predictStateVectorAndCovariance();
-            this.range_sensor_.setMeasurementVectorWithoutNoise(this.getPosition());
+            this.range_sensor_.computeMeasurementVector(this.getPosition(), false);
             this.range_sensor_.setObservationMatrix(this.getPosition());
             obs_matrix = this.range_sensor_.getObservationMatrix();
             obs_covmat = this.range_sensor_.getMeasureCovarinaceMatrix();

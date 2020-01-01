@@ -59,7 +59,7 @@ classdef PF_TargetTrackingRangeLandmarks < PF_LinearDynamics
             for iParticles = 1:this.number_particles
                 NUM_DIMS = this.num_dimensions;
                 position = this.particle_states(1:NUM_DIMS, iParticles);
-                this.range_sensor_.setMeasurementVectorWithoutNoise(position);
+                this.range_sensor_.computeMeasurementVector(position, false);
                 predicted_measurements = this.range_sensor_.getMeasurements();
                 diff_measurements = transpose(measurements - predicted_measurements);
                 obs_covmat = this.range_sensor_.getMeasureCovarinaceMatrix();
