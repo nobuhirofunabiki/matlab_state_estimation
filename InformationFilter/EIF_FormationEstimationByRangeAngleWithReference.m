@@ -9,8 +9,6 @@ classdef EIF_FormationEstimationByRangeAngleWithReference < ...
         % Abstract properties of MultiagentUtilityBase
         num_agents
         num_dimensions
-        % 
-        id_reference_agent
     end
     properties (SetAccess = protected)
         % Abstract properties of InformationFilterBase
@@ -30,7 +28,6 @@ classdef EIF_FormationEstimationByRangeAngleWithReference < ...
             obj.angle_sensor_           = AngleMeasurementMultiAgentWithReference(args.angle_sensor);
             obj.num_agents              = args.num_agents;
             obj.num_dimensions          = args.num_dimensions;
-            obj.id_reference_agent      = args.id_reference_agent;
             obj.state_vector            = args.state_vector;
             obj.process_noise_covmat    = args.process_noise_covmat;
             obj.discrete_system_matrix  = obj.createDiscreteSystemMatrix(args.discrete_system_matrix);
@@ -57,7 +54,7 @@ classdef EIF_FormationEstimationByRangeAngleWithReference < ...
 
             num_dims = this.num_dimensions;
             num_agents = this.num_agents;
-            id_ref = this.id_reference_agent;
+            % id_ref = this.id_reference_agent;
             positions = this.getPositionVector();
 
             % Range measurements
