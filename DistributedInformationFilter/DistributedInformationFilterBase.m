@@ -2,11 +2,10 @@ classdef DistributedInformationFilterBase < handle
     properties (SetAccess = protected)
         agent_id
         num_variables
-        state_vector                % x(k)
-        state_covmat                % P(k)
+        % state_vector                % x(k)
+        % state_covmat                % P(k)
         info_vector                 % z(k)
         info_matrix                 % Z(k)
-        num_agents                  % N
         obs_info_vector             % i(k)
         obs_info_vector_prev        % i(k-1)
         obs_info_vector_joint       % u(k)
@@ -18,6 +17,13 @@ classdef DistributedInformationFilterBase < handle
         out_info_vector_pool        % 
         out_info_matrix_pool        %
     end
+    properties (Abstract = true, SetAccess = protected)
+        state_vector
+        state_covmat
+    end
+    properties (Abstract = true, SetAccess = immutable)
+        num_agents
+    end
 
     methods (Access = protected)
         function obj = DistributedInformationFilterBase(args)
@@ -25,8 +31,8 @@ classdef DistributedInformationFilterBase < handle
             NUM_VAR = args.number_variables;
             obj.num_variables               = NUM_VAR;
             obj.agent_id                    = args.agent_id;
-            obj.num_agents                  = args.num_agents;
-            obj.state_vector                = args.state_vector;
+            % obj.num_agents                  = args.num_agents;
+            % obj.state_vector                = args.state_vector;
             obj.info_vector                 = zeros(NUM_VAR, 1);
             obj.info_matrix                 = zeros(NUM_VAR, NUM_VAR);
             obj.obs_info_vector             = zeros(NUM_VAR, 1);

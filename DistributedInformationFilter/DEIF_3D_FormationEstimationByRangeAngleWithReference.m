@@ -1,10 +1,9 @@
-classdef DIF_FormationEstimationByRangeAngleWithReference < ...
+classdef DEIF_3D_FormationEstimationByRangeAngleWithReference < ...
     DIF_LinearDynamics & ...
     MultiagentUtilityBase
 
     properties (SetAccess = private)
         range_sensor_ % Instance of RangeMeasurementMultiAgentWithReference class
-        angle_sensor_ % Instance of AngleMeasurementMultiAgentWithReference class
     end
     properties (SetAccess = protected)
         state_vector
@@ -20,10 +19,9 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
     end
 
     methods (Access = public)
-        function obj = DIF_FormationEstimationByRangeAngleWithReference(args)
+        function obj = DEIF_3D_FormationEstimationByRangeAngleWithReference(args)
             obj@DIF_LinearDynamics(args);
             obj.range_sensor_           = RangeMeasurementMultiAgentWithReference(args.range_sensor);
-            obj.angle_sensor_           = AngleMeasurementMultiAgentWithReference(args.angle_sensor);
             obj.num_agents              = args.num_agents;
             obj.num_dimensions          = args.num_dimensions;
             obj.state_vector            = args.state_vector;
@@ -34,9 +32,9 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
     end
 
     methods (Access = public)
-        function executeFiltering(this, measures, adjacent_matrix, ...
+        function executeFiltering(this, measures, discrete_system_matrix, adjacent_matrix, ...
             outsource_info_vector, outsource_info_matrix, position_ref)
-            this.predictStateVectorAndCovariance();
+            this.predictStateVectorAndCovariance(discrete_system_matrix);
             this.resetObservationInformation();
             this.processMeasurements(measures, adjacent_matrix, position_ref);
             this.clearOutSourceInformationPool();
@@ -48,6 +46,13 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
     end
 
     methods (Access = protected)
+        function predictStateVectorAndCovariance(this, discrete_system_matrix)
+            Ad = this.createDiscreteSystemMatrix(discrete_system_matrix);
+            Q = this.process_noise_covmat;
+            this.state_vector = Ad*this.state_vector;
+            this.state_covmat = Ad*this.state_covmat*Ad.' + Q;
+        end
+
         function processMeasurements(this, measures, adjacent_matrix, position_ref)
             % measures should have 'ranges' and 'angles' field
             positions = this.getPositionVector();
@@ -63,25 +68,7 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
                 obs_matrix_range, obs_covmat_range, measures.ranges, measures_predicted_range);
             
             % Angle measurements
-            this.angle_sensor_.computeMeasurementVector(positions, position_ref, false);
-            this.angle_sensor_.setObservationMatrix(positions, position_ref);
-            this.angle_sensor_.setMeasurementCovarianceMatrix(adjacent_matrix.angle);
-            obs_matrix_angle = this.angle_sensor_.getObservationMatrix();
-            obs_covmat_angle = this.angle_sensor_.getMeasureCovarinaceMatrix();
-            measures_predicted_angle = this.angle_sensor_.getMeasurements();
-            % TODO: How to tuckle the following singular point problem?
-            diff_measures = measures_predicted_angle - measures.angles;
-            for iMeasures = 1:length(diff_measures)
-                if (abs(diff_measures(iMeasures,1)) >= pi)
-                    if (measures_predicted_angle(iMeasures,1) > measures.angles(iMeasures,1))
-                        measures_predicted_angle(iMeasures,1) = measures_predicted_angle(iMeasures,1) - 2*pi;
-                    else
-                        measures_predicted_angle(iMeasures,1) = measures_predicted_angle(iMeasures,1) + 2*pi;
-                    end
-                end
-            end
-            this.addObservationInformation(...
-                obs_matrix_angle, obs_covmat_angle, measures.angles, measures_predicted_angle);   
+
         end
     end
 

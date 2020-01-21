@@ -1,17 +1,21 @@
 classdef DIF_LinearDynamics < DistributedInformationFilterBase
-    properties (SetAccess = protected)
+    % properties (SetAccess = protected)
+    %     discrete_system_matrix
+    %     process_noise_covmat
+    % end
+    properties (Abstract = true, SetAccess = immutable)
+        num_dimensions
         discrete_system_matrix
         process_noise_covmat
-        num_dimensions
     end
 
     methods (Access = protected)
         function obj = DIF_LinearDynamics(args)
             obj@DistributedInformationFilterBase(args);
             obj.process_noise_covmat    = args.process_noise_covmat;
-            obj.num_dimensions          = args.num_dimensions;
-            obj.setStateCovarianceMatrix(args.sigma_position, args.sigma_velocity);
-            obj.setDiscreteSystemMatrix(args.discrete_system_matrix);
+            % obj.num_dimensions          = args.num_dimensions;
+            % obj.setStateCovarianceMatrix(args.sigma_position, args.sigma_velocity);
+            % obj.setDiscreteSystemMatrix(args.discrete_system_matrix);
         end
     end
 
