@@ -5,6 +5,7 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
     properties (SetAccess = private)
         range_sensor_ % Instance of RangeMeasurementMultiAgentWithReference class
         angle_sensor_ % Instance of AngleMeasurementMultiAgentWithReference class
+        counter
     end
     properties (SetAccess = protected)
         state_vector
@@ -17,6 +18,8 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
         % Abstract properties of MultiagentUtilityBase
         num_agents
         num_dimensions
+        % 
+        wait_steps
     end
 
     methods (Access = public)
@@ -30,6 +33,8 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
             obj.state_covmat            = obj.createStateCovarianceMatrix(args.sigma_position, args.sigma_velocity);
             obj.process_noise_covmat    = args.process_noise_covmat;
             obj.discrete_system_matrix  = obj.createDiscreteSystemMatrix(args.discrete_system_matrix);
+            obj.counter                 = 0;
+            obj.wait_steps              = args.wait_steps;
         end
     end
 
@@ -43,7 +48,13 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
             this.addOutSourceInformationIntoPool(...
                 outsource_info_vector, outsource_info_matrix);
             this.integrateMultiSourceInformation();
-            this.computePosteriorPdf();
+            if (this.counter > this.wait_steps)
+                this.computePosteriorPdf();
+                this.counter = 0;
+            else
+                this.counter = this.counter + 1;
+            end
+            % this.computePosteriorPdf();
         end
     end
 
