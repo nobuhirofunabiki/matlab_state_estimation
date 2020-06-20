@@ -1,9 +1,7 @@
-classdef DistributedInformationFilterBase < handle
+classdef DecentralizedInformationFilterBase < handle
     properties (SetAccess = protected)
         agent_id
         num_variables
-        % state_vector                % x(k)
-        % state_covmat                % P(k)
         info_vector                 % z(k)
         info_matrix                 % Z(k)
         obs_info_vector             % i(k)
@@ -26,13 +24,11 @@ classdef DistributedInformationFilterBase < handle
     end
 
     methods (Access = protected)
-        function obj = DistributedInformationFilterBase(args)
+        function obj = DecentralizedInformationFilterBase(args)
             obj.checkConstructorArguments(args);
             NUM_VAR = args.number_variables;
             obj.num_variables               = NUM_VAR;
             obj.agent_id                    = args.agent_id;
-            % obj.num_agents                  = args.num_agents;
-            % obj.state_vector                = args.state_vector;
             obj.info_vector                 = zeros(NUM_VAR, 1);
             obj.info_matrix                 = zeros(NUM_VAR, NUM_VAR);
             obj.obs_info_vector             = zeros(NUM_VAR, 1);
