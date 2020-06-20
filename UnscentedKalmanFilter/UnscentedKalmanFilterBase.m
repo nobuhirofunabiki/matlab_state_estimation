@@ -74,8 +74,10 @@ classdef UnscentedKalmanFilterBase < handle
 
     methods (Access = protected)
         function generateSigmaPoints(this)
+            if (isdiag(this.state_covmat) == false)
+                this.state_covmat = 0.5*(this.state_covmat + (this.state_covmat)');
+            end
             A = this.gamma * chol(this.state_covmat).';
-            % A = this.gamma * sqrtm(this.state_covmat);
             x = this.state_vector;
             Y = x(:,ones(1,numel(x)));
             this.sigma_points = [x Y+A Y-A];
