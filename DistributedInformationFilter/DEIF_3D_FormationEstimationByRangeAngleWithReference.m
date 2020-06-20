@@ -3,7 +3,9 @@ classdef DEIF_3D_FormationEstimationByRangeAngleWithReference < ...
     MultiagentUtilityBase
 
     properties (SetAccess = private)
-        range_sensor_ % Instance of RangeMeasurementMultiAgentWithReference class
+        range_sensor_       % Instance of RangeMeasurementMultiAgentWithReference class
+        angle_sensor_       % Instance of AngleMeasurementMultiAgentWithReference3D class
+        counter
     end
     properties (SetAccess = protected)
         state_vector
@@ -16,18 +18,23 @@ classdef DEIF_3D_FormationEstimationByRangeAngleWithReference < ...
         % Abstract properties of MultiagentUtilityBase
         num_agents
         num_dimensions
+        % 
+        wait_steps
     end
 
     methods (Access = public)
         function obj = DEIF_3D_FormationEstimationByRangeAngleWithReference(args)
             obj@DIF_LinearDynamics(args);
             obj.range_sensor_           = RangeMeasurementMultiAgentWithReference(args.range_sensor);
+            obj.angle_sensor_           = AngleMeasurementMultiAgentWithReference3D(args.angle_sensor);
             obj.num_agents              = args.num_agents;
             obj.num_dimensions          = args.num_dimensions;
             obj.state_vector            = args.state_vector;
             obj.state_covmat            = obj.createStateCovarianceMatrix(args.sigma_position, args.sigma_velocity);
             obj.process_noise_covmat    = args.process_noise_covmat;
             obj.discrete_system_matrix  = obj.createDiscreteSystemMatrix(args.discrete_system_matrix);
+            obj.counter                 = 0;
+            obj.wait_steps              = args.wait_steps;
         end
     end
 
@@ -41,7 +48,12 @@ classdef DEIF_3D_FormationEstimationByRangeAngleWithReference < ...
             this.addOutSourceInformationIntoPool(...
                 outsource_info_vector, outsource_info_matrix);
             this.integrateMultiSourceInformation();
-            this.computePosteriorPdf();
+            if (this.counter > obj.wait_steps)
+                this.computePosteriorPdf();
+                this.counter = 0;
+            else
+                this.counter = this.counter + 1;
+            end
         end
     end
 
@@ -68,6 +80,25 @@ classdef DEIF_3D_FormationEstimationByRangeAngleWithReference < ...
                 obs_matrix_range, obs_covmat_range, measures.ranges, measures_predicted_range);
             
             % Angle measurements
+            this.angle_sensor_.computeMeasurementVector(positions, position_ref, false);
+            this.angle_sensor_.setObservationMatrix(positions, position_ref);
+            this.angle_sensor_.setMeasurementCovarianceMatrix(adjacent_matrix.angle);
+            obs_matrix_angle = this.angle_sensor_.getObservationMatrix();
+            obs_covmat_angle = this.angle_sensor_.getMeasureCovarinaceMatrix();
+            measures_predicted_angle = this.angle_sensor_.getMeasurements();
+            % TODO: How to tuckle the following singular point problem?
+            diff_measures = measures_predicted_angle - measures.angles;
+            for iMeasures = 1:length(diff_measures)
+                if (abs(diff_measures(iMeasures,1)) >= pi)
+                    if (measures_predicted_angle(iMeasures,1) > measures.angles(iMeasures,1))
+                        measures_predicted_angle(iMeasures,1) = measures_predicted_angle(iMeasures,1) - 2*pi;
+                    else
+                        measures_predicted_angle(iMeasures,1) = measures_predicted_angle(iMeasures,1) + 2*pi;
+                    end
+                end
+            end
+            this.addObservationInformation(...
+                obs_matrix_angle, obs_covmat_angle, measures.angles, measures_predicted_angle);
 
         end
     end
