@@ -17,6 +17,7 @@ classdef EIF_3D_FormationEstimationByRangeAngleWithReference < ...
     end
     properties (SetAccess = private)
         range_sensor_       % Instance of RangeMeasurementMultiAgentWithReference class
+        angle_sensor_       % Instance of AngleMeasurementMultiAgentWithReference3D class
     end
 
     methods (Access = public)
@@ -24,6 +25,7 @@ classdef EIF_3D_FormationEstimationByRangeAngleWithReference < ...
             obj@ExtendedInformationFilter(args);
             obj.checkConstructorArguments(args);
             obj.range_sensor_           = RangeMeasurementMultiAgentWithReference(args.range_sensor);
+            obj.angle_sensor_           = AngleMeasurementMultiAgentWithReference3D(args.angle_sensor);
             obj.num_agents              = args.num_agents;
             obj.num_dimensions          = args.num_dimensions;
             obj.state_vector            = args.state_vector;
@@ -62,6 +64,27 @@ classdef EIF_3D_FormationEstimationByRangeAngleWithReference < ...
             measures_predicted_range = this.range_sensor_.getMeasurements();
             this.addObservationInformation(...
                 obs_matrix_range, obs_covmat_range, measures.ranges, measures_predicted_range);
+
+            % Angle measurements
+            this.angle_sensor_.computeMeasurementVector(positions, position_ref, false);
+            this.angle_sensor_.setObservationMatrix(positions, position_ref);
+            this.angle_sensor_.setMeasurementCovarianceMatrix(adjacent_matrix.angle);
+            obs_matrix_angle = this.angle_sensor_.getObservationMatrix();
+            obs_covmat_angle = this.angle_sensor_.getMeasureCovarinaceMatrix();
+            measures_predicted_angle = this.angle_sensor_.getMeasurements();
+            % TODO: How to tuckle the following singular point problem?
+            diff_measures = measures_predicted_angle - measures.angles;
+            for iMeasures = 1:length(diff_measures)
+                if (abs(diff_measures(iMeasures,1)) >= pi)
+                    if (measures_predicted_angle(iMeasures,1) > measures.angles(iMeasures,1))
+                        measures_predicted_angle(iMeasures,1) = measures_predicted_angle(iMeasures,1) - 2*pi;
+                    else
+                        measures_predicted_angle(iMeasures,1) = measures_predicted_angle(iMeasures,1) + 2*pi;
+                    end
+                end
+            end
+            this.addObservationInformation(...
+                obs_matrix_angle, obs_covmat_angle, measures.angles, measures_predicted_angle);
 
             this.convertInformationToMomentsForm();
         end
