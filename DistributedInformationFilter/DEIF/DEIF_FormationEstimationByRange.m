@@ -1,11 +1,11 @@
-classdef DIF_FormationEstimationByRange < DIF_LinearDynamics
+classdef DEIF_FormationEstimationByRange < DIF_LinearDynamics
     properties (SetAccess = private)
         range_sensor_       % Instance of RangeMeasurementInterAgents class
         position_sensor_    % Instance of PositionMeasurementMultiAgents class
     end
 
     methods (Access = public)
-        function obj = DIF_FormationEstimationByRange(args)
+        function obj = DEIF_FormationEstimationByRange(args)
             obj@DIF_LinearDynamics(args);
             obj.range_sensor_       = RangeMeasurementInterAgents(args.range_sensor);
             obj.position_sensor_    = PositionMeasurementMultiAgents(args.position_sensor);

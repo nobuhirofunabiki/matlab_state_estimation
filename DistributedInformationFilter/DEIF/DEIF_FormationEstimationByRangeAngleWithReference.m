@@ -1,4 +1,4 @@
-classdef DIF_FormationEstimationByRangeAngleWithReference < ...
+classdef DEIF_FormationEstimationByRangeAngleWithReference < ...
     DIF_LinearDynamics & ...
     MultiagentUtilityBase
 
@@ -23,7 +23,7 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
     end
 
     methods (Access = public)
-        function obj = DIF_FormationEstimationByRangeAngleWithReference(args)
+        function obj = DEIF_FormationEstimationByRangeAngleWithReference(args)
             obj@DIF_LinearDynamics(args);
             obj.range_sensor_           = RangeMeasurementMultiAgentWithReference(args.range_sensor);
             obj.angle_sensor_           = AngleMeasurementMultiAgentWithReference(args.angle_sensor);
@@ -48,13 +48,13 @@ classdef DIF_FormationEstimationByRangeAngleWithReference < ...
             this.addOutSourceInformationIntoPool(...
                 outsource_info_vector, outsource_info_matrix);
             this.integrateMultiSourceInformation();
-            if (this.counter > this.wait_steps)
+            if (this.counter >= this.wait_steps)
                 this.computePosteriorPdf();
+                % this.clearOutSourceInformationPool();
                 this.counter = 0;
             else
                 this.counter = this.counter + 1;
             end
-            % this.computePosteriorPdf();
         end
     end
 
