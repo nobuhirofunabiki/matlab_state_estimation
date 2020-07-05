@@ -50,7 +50,6 @@ classdef DEIF_FormationEstimationByRangeAngleWithReference < ...
             this.integrateMultiSourceInformation();
             if (this.counter >= this.wait_steps)
                 this.computePosteriorPdf();
-                % this.clearOutSourceInformationPool();
                 this.counter = 0;
             else
                 this.counter = this.counter + 1;

@@ -48,7 +48,7 @@ classdef DEIF_3D_FormationEstimationByRangeAngleWithReference < ...
             this.addOutSourceInformationIntoPool(...
                 outsource_info_vector, outsource_info_matrix);
             this.integrateMultiSourceInformation();
-            if (this.counter > this.wait_steps)
+            if (this.counter >= this.wait_steps)
                 this.computePosteriorPdf();
                 this.counter = 0;
             else
