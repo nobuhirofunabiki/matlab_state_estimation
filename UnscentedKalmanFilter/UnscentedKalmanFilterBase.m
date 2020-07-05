@@ -57,7 +57,6 @@ classdef UnscentedKalmanFilterBase < handle
         function executeUnscentedKalmanFilter(this, measurements)
             this.generateSigmaPoints();
             this.predictStates();
-            this.generateSigmaPoints();
             this.processMeasurements(measurements);
             this.updateByMeasurements();
         end
