@@ -20,6 +20,9 @@ classdef DUIF_FormationEstimationByRangeAngleWithReference < ...
         num_dimensions
         % 
         wait_steps
+        % Ratio actual noise vs noise model in the estimator
+        ratio_range_noise
+        ratio_angle_noise
     end
 
     methods (Access = public)
@@ -27,6 +30,8 @@ classdef DUIF_FormationEstimationByRangeAngleWithReference < ...
             obj@DecentralizedUnscentedInformationFilterBase(args);
             obj.range_sensor_           = RangeMeasurementMultiAgentWithReference(args.range_sensor);
             obj.angle_sensor_           = AngleMeasurementMultiAgentWithReference(args.angle_sensor);
+            obj.ratio_range_noise       = args.ratio_range_noise;
+            obj.ratio_angle_noise       = args.ratio_angle_noise;
             obj.num_agents              = args.num_agents;
             obj.num_dimensions          = args.num_dimensions;
             obj.state_vector            = args.state_vector;
@@ -68,9 +73,9 @@ classdef DUIF_FormationEstimationByRangeAngleWithReference < ...
             this.range_sensor_.updateMeasurementCovarianceMatrix(adjacent_matrix.range);
             this.angle_sensor_.setMeasurementCovarianceMatrix(adjacent_matrix.angle);
             obs_covmat(1:num_ranges, 1:num_ranges) ...
-                = this.range_sensor_.getMeasureCovarinaceMatrix();
+                = this.range_sensor_.getMeasureCovarinaceMatrix() * this.ratio_range_noise;
             obs_covmat(num_ranges+1:num_ranges+num_angles, num_ranges+1:num_ranges+num_angles) ...
-                = this.angle_sensor_.getMeasureCovarinaceMatrix();
+                = this.angle_sensor_.getMeasureCovarinaceMatrix() * this.ratio_angle_noise;
             
             num_sigma_points = length(this.sigma_points);
             Z = zeros(num_measures,num_sigma_points);

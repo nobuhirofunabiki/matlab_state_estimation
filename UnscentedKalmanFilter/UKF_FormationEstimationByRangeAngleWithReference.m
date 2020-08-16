@@ -11,6 +11,9 @@ classdef UKF_FormationEstimationByRangeAngleWithReference < ...
     properties (SetAccess = private)
         range_sensor_       % Instance of RangeMeasurementMultiAgentWithReference class
         angle_sensor_       % Instance of AngleMeasurementMultiAgentWithReference class
+        % Ratio actual noise vs noise model in the estimator
+        ratio_range_noise
+        ratio_angle_noise
     end
     properties (SetAccess = immutable)
         num_dimensions
@@ -22,6 +25,8 @@ classdef UKF_FormationEstimationByRangeAngleWithReference < ...
             obj@UKF_LinearDynamics(args);
             obj.range_sensor_           = RangeMeasurementMultiAgentWithReference(args.range_sensor);
             obj.angle_sensor_           = AngleMeasurementMultiAgentWithReference(args.angle_sensor);
+            obj.ratio_range_noise       = args.ratio_range_noise;
+            obj.ratio_angle_noise       = args.ratio_angle_noise;
             obj.num_agents              = args.num_agents;
             obj.num_dimensions          = args.num_dimensions;
             obj.state_vector            = args.init_state_vector;
@@ -53,9 +58,9 @@ classdef UKF_FormationEstimationByRangeAngleWithReference < ...
             this.range_sensor_.updateMeasurementCovarianceMatrix(adjacent_matrix.range);
             this.angle_sensor_.setMeasurementCovarianceMatrix(adjacent_matrix.angle);
             obs_covmat(1:num_ranges, 1:num_ranges) ...
-                = this.range_sensor_.getMeasureCovarinaceMatrix();
+                = this.range_sensor_.getMeasureCovarinaceMatrix() * this.ratio_range_noise;
             obs_covmat(num_ranges+1:num_ranges+num_angles, num_ranges+1:num_ranges+num_angles) ...
-                = this.angle_sensor_.getMeasureCovarinaceMatrix();
+                = this.angle_sensor_.getMeasureCovarinaceMatrix() * this.ratio_angle_noise;
             for iPoints = 1:num_sigma_points
                 positions = this.getPositionVector(iPoints);
                 this.range_sensor_.computeMeasurementVector(positions, position_ref, false);

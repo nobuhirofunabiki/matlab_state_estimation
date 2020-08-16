@@ -72,7 +72,7 @@ classdef DEIF_FormationEstimationByRangeAngleWithReference < ...
             this.range_sensor_.setObservationMatrix(positions, position_ref);
             this.range_sensor_.updateMeasurementCovarianceMatrix(adjacent_matrix.range);
             obs_matrix_range = this.range_sensor_.getObservationMatrix();
-            obs_covmat_range = this.range_sensor_.getMeasureCovarinaceMatrix() * this.ratio_range_noise;;
+            obs_covmat_range = this.range_sensor_.getMeasureCovarinaceMatrix() * this.ratio_range_noise;
             measures_predicted_range = this.range_sensor_.getMeasurements();
             this.addObservationInformation(...
                 obs_matrix_range, obs_covmat_range, measures.ranges, measures_predicted_range);
