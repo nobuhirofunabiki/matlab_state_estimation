@@ -18,6 +18,9 @@ classdef EIF_3D_FormationEstimationByRangeAngleWithReference < ...
     properties (SetAccess = private)
         range_sensor_       % Instance of RangeMeasurementMultiAgentWithReference class
         angle_sensor_       % Instance of AngleMeasurementMultiAgentWithReference3D class
+        % Ratio actual noise vs noise model in the estimator
+        ratio_range_noise
+        ratio_angle_noise
     end
 
     methods (Access = public)
@@ -26,6 +29,8 @@ classdef EIF_3D_FormationEstimationByRangeAngleWithReference < ...
             obj.checkConstructorArguments(args);
             obj.range_sensor_           = RangeMeasurementMultiAgentWithReference(args.range_sensor);
             obj.angle_sensor_           = AngleMeasurementMultiAgentWithReference3D(args.angle_sensor);
+            obj.ratio_range_noise       = args.ratio_range_noise;
+            obj.ratio_angle_noise       = args.ratio_angle_noise;
             obj.num_agents              = args.num_agents;
             obj.num_dimensions          = args.num_dimensions;
             obj.state_vector            = args.state_vector;
@@ -60,7 +65,7 @@ classdef EIF_3D_FormationEstimationByRangeAngleWithReference < ...
             this.range_sensor_.setObservationMatrix(positions, position_ref);
             this.range_sensor_.updateMeasurementCovarianceMatrix(adjacent_matrix.range);
             obs_matrix_range = this.range_sensor_.getObservationMatrix();
-            obs_covmat_range = this.range_sensor_.getMeasureCovarinaceMatrix();
+            obs_covmat_range = this.range_sensor_.getMeasureCovarinaceMatrix()*this.ratio_range_noise;
             measures_predicted_range = this.range_sensor_.getMeasurements();
             this.addObservationInformation(...
                 obs_matrix_range, obs_covmat_range, measures.ranges, measures_predicted_range);
@@ -70,7 +75,7 @@ classdef EIF_3D_FormationEstimationByRangeAngleWithReference < ...
             this.angle_sensor_.setObservationMatrix(positions, position_ref);
             this.angle_sensor_.setMeasurementCovarianceMatrix(adjacent_matrix.angle);
             obs_matrix_angle = this.angle_sensor_.getObservationMatrix();
-            obs_covmat_angle = this.angle_sensor_.getMeasureCovarinaceMatrix();
+            obs_covmat_angle = this.angle_sensor_.getMeasureCovarinaceMatrix()*this.ratio_angle_noise;
             measures_predicted_angle = this.angle_sensor_.getMeasurements();
             % TODO: How to tuckle the following singular point problem?
             diff_measures = measures_predicted_angle - measures.angles;
