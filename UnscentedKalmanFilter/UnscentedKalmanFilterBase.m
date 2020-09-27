@@ -9,6 +9,7 @@ classdef UnscentedKalmanFilterBase < handle
         Z_diff
         z_pred
         measurements
+        K
     end
     properties (SetAccess = immutable)
         alpha
@@ -57,6 +58,7 @@ classdef UnscentedKalmanFilterBase < handle
         function executeUnscentedKalmanFilter(this, measurements)
             this.generateSigmaPoints();
             this.predictStates();
+            this.generateSigmaPoints();
             this.processMeasurements(measurements);
             this.updateByMeasurements();
         end
@@ -83,8 +85,10 @@ classdef UnscentedKalmanFilterBase < handle
         end
 
         function updateByMeasurements(this)
+            this.X_diff = this.sigma_points - this.state_vector;
             this.Pxz = this.X_diff*diag(this.weights_cov)*this.Z_diff';
             K = this.Pxz*inv(this.Pzz);
+            this.K = K;
             this.state_vector = this.state_vector + K*(this.measurements - this.z_pred);
             this.state_covmat = this.state_covmat - K*this.Pzz*K';
         end
