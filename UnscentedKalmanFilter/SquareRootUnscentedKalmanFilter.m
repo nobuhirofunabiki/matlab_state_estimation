@@ -33,7 +33,9 @@ classdef SquareRootUnscentedKalmanFilter < UnscentedKalmanFilterBase
 
         function updateByMeasurements(this)
             this.Pxz = this.X_diff*diag(this.weights_cov)*this.Z_diff';
-            K = (this.Pxz/this.Sz)/(this.Sz).';
+            this.Pzz = (this.Sz).'*this.Sz;
+            K = this.Pxz*inv(this.Pzz);
+            this.K = K;
             this.state_vector = this.state_vector + K*(this.measurements - this.z_pred);
             U = K*(this.Sz).';
             for i = 1:size(U,2)
@@ -68,7 +70,8 @@ classdef SquareRootUnscentedKalmanFilter < UnscentedKalmanFilterBase
             end
             M = horzcat(x_diff_weighted, square_root_covariance);
             [foo, S] = qr(M.');
-            S = S(1:num_variables,1:num_variables);
+            % S = qr(M.');
+            S_test = S(1:num_variables,1:num_variables);
             if sign(this.weights_cov(1,1)) == 1
                 operation = '+';
             elseif sign(this.weights_cov(1,1)) == -1
@@ -76,7 +79,7 @@ classdef SquareRootUnscentedKalmanFilter < UnscentedKalmanFilterBase
             else
                 error('QR decomposition error');
             end
-            obj = cholupdate(S, sqrt(norm(this.weights_cov(1,1)))*x_diff(:,1), operation);
+            obj = cholupdate(S_test, sqrt(norm(this.weights_cov(1,1)))*x_diff(:,1), operation);
         end
     end
 
