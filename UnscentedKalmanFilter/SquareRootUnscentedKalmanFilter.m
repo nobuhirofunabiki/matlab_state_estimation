@@ -14,16 +14,6 @@ classdef SquareRootUnscentedKalmanFilter < UnscentedKalmanFilterBase
         end
     end
 
-    methods (Access = public)
-        function executeUnscentedKalmanFilter(this, measurements)
-            this.sigma_points = this.generateSigmaPoints();
-            this.predictStates();
-            this.sigma_points = this.generateSigmaPoints();
-            this.processMeasurements(measurements);
-            this.updateByMeasurements();
-        end
-    end
-
     methods (Access = protected)
         function obj = generateSigmaPoints(this)
             A = this.gamma * (this.S).';

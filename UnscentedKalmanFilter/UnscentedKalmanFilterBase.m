@@ -56,9 +56,9 @@ classdef UnscentedKalmanFilterBase < handle
 
     methods (Access = public)
         function executeUnscentedKalmanFilter(this, measurements)
-            this.generateSigmaPoints();
+            this.sigma_points = this.generateSigmaPoints();
             this.predictStates();
-            this.generateSigmaPoints();
+            this.sigma_points = this.generateSigmaPoints();
             this.processMeasurements(measurements);
             this.updateByMeasurements();
         end
@@ -74,14 +74,14 @@ classdef UnscentedKalmanFilterBase < handle
     end
 
     methods (Access = protected)
-        function generateSigmaPoints(this)
+        function obj = generateSigmaPoints(this)
             if (isdiag(this.state_covmat) == false)
                 this.state_covmat = 0.5*(this.state_covmat + (this.state_covmat)');
             end
             A = this.gamma * chol(this.state_covmat).';
             x = this.state_vector;
             Y = x(:,ones(1,numel(x)));
-            this.sigma_points = [x Y+A Y-A];
+            obj = [x Y+A Y-A];
         end
 
         function updateByMeasurements(this)
