@@ -48,7 +48,7 @@ classdef SRUKF_TargetTrackingRangeLandmarks < SquareRootUnscentedKalmanFilter
             end
             this.z_pred = z_pred;
             this.Z_diff = Z - z_pred(:,ones(1,num_sigma_points));
-            this.Sz = this.qr_decomposition(this.Z_diff, this.sqrtR);
+            this.Sz = this.functions_.qr_decomposition(this.Z_diff, this.sqrtR, this.weights_cov);
         end
     end
 end
