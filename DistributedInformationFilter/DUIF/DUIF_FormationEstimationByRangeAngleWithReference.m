@@ -46,7 +46,9 @@ classdef DUIF_FormationEstimationByRangeAngleWithReference < ...
     methods (Access = public)
         function executeFiltering(this, measures, adjacent_matrix, ...
             outsource_info_vector, outsource_info_matrix, position_ref)
+            this.sigma_points = this.generateSigmaPoints(this.state_vector, this.state_covmat);
             this.predictStateVectorAndCovariance();
+            this.sigma_points = this.generateSigmaPoints(this.state_vector, this.state_covmat);
             this.resetObservationInformation();
             this.processMeasurements(measures, adjacent_matrix, position_ref);
             this.clearOutSourceInformationPool();
@@ -101,6 +103,7 @@ classdef DUIF_FormationEstimationByRangeAngleWithReference < ...
                 z_pred = z_pred + this.weights_mean(1,iPoints)*Z(:,iPoints);
             end
             Z_diff = Z - z_pred(:,ones(1,num_sigma_points));
+            this.X_diff = this.sigma_points - this.state_vector;
             Pxy = this.X_diff*diag(this.weights_cov)*Z_diff.';
             this.addObservationInformation(Pxy, obs_covmat, agg_measurements, z_pred);
         end

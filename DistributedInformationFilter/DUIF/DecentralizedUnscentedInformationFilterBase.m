@@ -50,7 +50,6 @@ classdef DecentralizedUnscentedInformationFilterBase < DecentralizedInformationF
 
     methods (Access = protected)
         function predictStateVectorAndCovariance(this)
-            this.generateSigmaPoints(this.state_vector, this.state_covmat);
             num_sigma_points = size(this.sigma_points, 2);
             state_vector_prior = zeros(size(this.state_vector));
             sigma_point_states = zeros(size(this.sigma_points));
@@ -64,7 +63,7 @@ classdef DecentralizedUnscentedInformationFilterBase < DecentralizedInformationF
             this.state_covmat = this.X_diff*diag(this.weights_cov)*(this.X_diff).' + this.process_noise_covmat;
         end
 
-        function generateSigmaPoints(this, mean_, covariance_)
+        function output = generateSigmaPoints(this, mean_, covariance_)
             if (isdiag(covariance_) == false)
                 covariance_ = 0.5*(covariance_ + (covariance_)');
                 this.state_covmat = covariance_;
@@ -72,7 +71,7 @@ classdef DecentralizedUnscentedInformationFilterBase < DecentralizedInformationF
             Y = mean_(:,ones(1,numel(mean_)));
             S = chol(covariance_);
             A = this.gamma * S.';
-            this.sigma_points = [mean_ Y+A Y-A];
+            output = [mean_ Y+A Y-A];
         end
     end
 
