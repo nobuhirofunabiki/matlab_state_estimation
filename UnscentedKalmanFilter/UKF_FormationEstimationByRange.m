@@ -35,8 +35,9 @@ classdef UKF_FormationEstimationByRange < ...
 
     methods (Access = public)
         function executeUnscentedKalmanFilter(this, measurements, adjacent_matrix)
-            this.generateSigmaPoints();
+            this.sigma_points = this.generateSigmaPoints();
             this.predictStates();
+            this.sigma_points = this.generateSigmaPoints();
             this.processMeasurements(measurements, adjacent_matrix);
             this.updateByMeasurements();
         end

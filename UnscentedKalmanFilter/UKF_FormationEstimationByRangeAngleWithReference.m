@@ -38,8 +38,9 @@ classdef UKF_FormationEstimationByRangeAngleWithReference < ...
 
     methods (Access = public)
         function executeUnscentedKalmanFilter(this, measurements, adjacent_matrix, position_ref)
-            this.generateSigmaPoints();
+            this.sigma_points = this.generateSigmaPoints();
             this.predictStates();
+            this.sigma_points = this.generateSigmaPoints();
             this.processMeasurements(measurements, adjacent_matrix, position_ref);
             this.updateByMeasurements();
         end
