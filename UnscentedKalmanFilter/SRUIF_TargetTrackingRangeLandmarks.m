@@ -24,9 +24,9 @@ classdef SRUIF_TargetTrackingRangeLandmarks < SquareRootUnscentedInformationFilt
             obj.discrete_system_matrix  = args.discrete_system_matrix;
             obj.process_noise_covmat    = args.process_noise_covmat;
             obj.info_vector             = inv(args.state_covmat) * args.state_vector;
-            obj.sqrt_cov_matrix         = chol(args.state_covmat);
+            obj.sqrt_cov_matrix         = chol(args.state_covmat, 'lower');
             obj.sqrt_info_matrix        = transpose(inv(obj.sqrt_cov_matrix));
-            obj.sqrtQ                   = chol(args.process_noise_covmat);
+            obj.sqrtQ                   = chol(args.process_noise_covmat, 'lower');
             num_measures                = size(obj.range_sensor_.getLandmarkList(), 2);
             obj.sqrtR                   = zeros(num_measures, num_measures);
         end
@@ -40,7 +40,7 @@ classdef SRUIF_TargetTrackingRangeLandmarks < SquareRootUnscentedInformationFilt
             z_pred              = zeros(num_measures,1);
             Z                   = zeros(num_measures,num_sigma_points);
             obs_covmat          = this.range_sensor_.getMeasureCovarinaceMatrix();
-            this.sqrtR          = chol(obs_covmat);
+            this.sqrtR          = chol(obs_covmat, 'lower');
             for iPoints = 1:num_sigma_points
                 % TODO: only for 2D
                 position = this.sigma_points(1:2, iPoints);

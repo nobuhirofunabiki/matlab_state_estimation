@@ -78,7 +78,7 @@ classdef UnscentedKalmanFilterBase < handle
             if (isdiag(this.state_covmat) == false)
                 this.state_covmat = 0.5*(this.state_covmat + (this.state_covmat)');
             end
-            A = this.gamma * chol(this.state_covmat).';
+            A = this.gamma * chol(this.state_covmat, 'lower');
             x = this.state_vector;
             Y = x(:,ones(1,numel(x)));
             obj = [x Y+A Y-A];

@@ -21,7 +21,7 @@ classdef SquareRootUnscentedKalmanFilter < UnscentedKalmanFilterBase
 
     methods (Access = protected)
         function obj = generateSigmaPoints(this)
-            A = this.gamma * (this.S).';
+            A = this.gamma * this.S;
             x = this.state_vector;
             Y = x(:,ones(1,numel(x)));
             obj = [x Y+A Y-A];
@@ -30,14 +30,20 @@ classdef SquareRootUnscentedKalmanFilter < UnscentedKalmanFilterBase
         function updateByMeasurements(this)
             this.X_diff = this.sigma_points - this.state_vector;
             this.Pxz = this.X_diff*diag(this.weights_cov)*this.Z_diff';
-            this.Pzz = (this.Sz).'*this.Sz;
-            K = this.Pxz*inv(this.Pzz);
-            this.K = K;
-            this.state_vector = this.state_vector + K*(this.measurements - this.z_pred);
-            U = K*(this.Sz).';
+            this.Pzz = this.Sz*(this.Sz).';
+            this.K = this.Pxz*inv(this.Pzz);
+            R = this.sqrtR * transpose(this.sqrtR);
+            info_matrix = inv(this.S * transpose(this.S));
+            info_vector = info_matrix * this.state_vector;
+            this.state_vector = this.state_vector + this.K*(this.measurements - this.z_pred);
+            U = this.K * this.Sz;
+            hoge = transpose(this.S);
             for i = 1:size(U,2)
-                this.S = cholupdate(this.S, U(:,i), '-');
+                hoge = cholupdate(hoge, U(:,i), '-');
             end
+            this.S = hoge.';
+            info_matrix = inv(this.S * transpose(this.S));
+            info_vector = info_matrix * this.state_vector;
         end
 
         function predictStates(this)
