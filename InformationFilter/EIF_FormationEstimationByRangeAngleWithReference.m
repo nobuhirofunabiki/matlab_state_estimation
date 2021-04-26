@@ -56,6 +56,7 @@ classdef EIF_FormationEstimationByRangeAngleWithReference < ...
             % measures should have 'ranges' and 'positions' field
             this.predictStateVectorAndCovariance();
             this.convertMomentsToInformationForm();
+            this.clearInformationContribution();
 
             num_dims = this.num_dimensions;
             num_agents = this.num_agents;

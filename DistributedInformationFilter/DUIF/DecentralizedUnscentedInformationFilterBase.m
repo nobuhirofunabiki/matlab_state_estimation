@@ -61,6 +61,8 @@ classdef DecentralizedUnscentedInformationFilterBase < DecentralizedInformationF
             this.state_vector = state_vector_prior;
             this.X_diff = sigma_point_states - state_vector_prior(:,ones(1,num_sigma_points));
             this.state_covmat = this.X_diff*diag(this.weights_cov)*(this.X_diff).' + this.process_noise_covmat;
+            info_matrix = inv(this.state_covmat);
+            info_vector = info_matrix*this.state_vector;
         end
 
         function output = generateSigmaPoints(this, mean_, covariance_)

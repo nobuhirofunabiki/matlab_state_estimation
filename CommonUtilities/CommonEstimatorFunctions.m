@@ -22,7 +22,17 @@ classdef CommonEstimatorFunctions < handle
             else
                 error('QR decomposition error');
             end
-            output = cholupdate(S_trimmed, sqrt(norm(weights_cov(1,1)))*x_diff(:,1), operation);
+            % output = cholupdate(S_trimmed, sqrt(norm(weights_cov(1,1)))*x_diff(:,1), operation);
+            hoge = cholupdate(S_trimmed, sqrt(norm(weights_cov(1,1)))*x_diff(:,1), operation);
+            output = hoge.';
+        end
+
+        function output = qr_decomposition_pure(this, A)
+            [Q, R] = qr(A.');
+            column_size = size(R,2);
+            R_tilde = R(1:column_size, 1:column_size);
+            hoge = R_tilde.';
+            output = hoge;
         end
 
     end

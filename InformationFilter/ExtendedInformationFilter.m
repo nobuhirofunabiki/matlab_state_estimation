@@ -25,8 +25,10 @@ classdef ExtendedInformationFilter < InformationFilterBase
             y = measures;
             y_hat = measures_predicted;
             x_hat = this.state_vector;
-            this.info_vector = this.info_vector + H.'/R*(y - y_hat + H*x_hat);
-            this.info_matrix = this.info_matrix + H.'/R*H;
+            this.obs_info_vector    = this.obs_info_vector + H.'/R*(y - y_hat + H*x_hat);
+            this.obs_info_matrix    = this.obs_info_vector + H.'/R*H;
+            this.info_vector        = this.info_vector + H.'/R*(y - y_hat + H*x_hat);
+            this.info_matrix        = this.info_matrix + H.'/R*H;
         end
     end
 

@@ -148,15 +148,18 @@ classdef DecentralizedSquareRootUnscentedInformationFilterBase < DecentralizedIn
         function integrateMultiSourceInformation(this)
             this.step = this.step + 1;
             if (this.step == 1)
-                this.obs_info_vector_joint = this.obs_info_vector;
-                this.sqrt_obs_info_matrix_joint = this.sqrt_obs_info_matrix;
+                % this.obs_info_vector_joint = this.obs_info_vector;
+                % this.sqrt_obs_info_matrix_joint = this.sqrt_obs_info_matrix;
             else
                 % Information contribution vector
+                % this.obs_info_vector_joint = ...
+                %     this.obs_info_vector - this.obs_info_vector_prev ...
+                %     + this.out_info_vector_pool;
                 this.obs_info_vector_joint = ...
-                    this.obs_info_vector - this.obs_info_vector_prev ...
-                    + this.out_info_vector_pool;
+                    this.obs_info_vector_prev + this.out_info_vector_pool;
                 % Square-root information contribution matrix
-                this.sqrt_obs_info_matrix_joint = this.sqrt_obs_info_matrix;
+                % this.sqrt_obs_info_matrix_joint = this.sqrt_obs_info_matrix;
+                this.sqrt_obs_info_matrix_joint = zeros(size(this.sqrt_obs_info_matrix_joint));
                 hoge = this.sqrt_obs_info_matrix_joint;
                 % obs_info_matrix = hoge.'*hoge;
                 
@@ -174,12 +177,12 @@ classdef DecentralizedSquareRootUnscentedInformationFilterBase < DecentralizedIn
                 % こいつが上手くいかない...
                 % mainから読み込んでいるout_info_poolがduifと一致していることは確認済み
                 % sqrt_obs_info_matrix_prevがduifと一致していることは確認済み
-                U1 = this.sqrt_obs_info_matrix_prev;
+                % U1 = this.sqrt_obs_info_matrix_prev;
                 % obs_info_matrix_prev = U1.'*U1;
-                for i = 1:size(U1,1)
-                    % hoge = cholupdate(hoge, transpose(U1(i,:)), '-');
-                    hoge = cholupdate(hoge, U1(:,i), '-');
-                end
+                % for i = 1:size(U1,1)
+                %     % hoge = cholupdate(hoge, transpose(U1(i,:)), '-');
+                %     hoge = cholupdate(hoge, U1(:,i), '-');
+                % end
                 % test1 = hoge.'*hoge - U1.'*U1;
                 % hoge = chol(test1);
 
@@ -205,6 +208,12 @@ classdef DecentralizedSquareRootUnscentedInformationFilterBase < DecentralizedIn
 
             this.state_covmat = inv(info_matrix);
             this.state_vector = this.state_covmat * this.info_vector;
+
+            this.obs_info_vector_joint = this.obs_info_vector_joint + this.obs_info_vector;
+            U2 = this.sqrt_out_info_matrix_pool;
+            for i = 1:size(U2,1)
+                this.sqrt_obs_info_matrix_joint = cholupdate(this.sqrt_obs_info_matrix_joint, U2(:,i), '+');
+            end
         end
     end
 end

@@ -126,7 +126,7 @@ classdef DSRUIF_FormationEstimationByRangeAngleWithReference < ...
             y_hat = measures_predicted;
             x_hat = this.state_vector;
             Sz = this.sqrt_info_matrix;
-            Si = sqrtR.' * Pxy.' * Sz * Sz.';
+            Si = sqrtR.' * Pxy.' * Sz * Sz.'; % これおかしい...
             obs_info_matrix_Si = Si.' * Si;
             this.obs_info_vector = Si.' * sqrtR * (y - y_hat) + Si.' * Si * x_hat;
             Si_square = this.functions_.qr_decomposition_pure(Si.');

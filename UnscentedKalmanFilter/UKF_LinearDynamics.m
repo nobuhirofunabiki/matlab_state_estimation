@@ -1,7 +1,7 @@
 classdef UKF_LinearDynamics < UnscentedKalmanFilterBase
     properties (Abstract = true, SetAccess = protected)
         discrete_system_matrix
-        process_noise_covmat 
+        process_noise_covmat        % covariance matrix of process noise
     end
     methods (Access = protected)
         function obj = UKF_LinearDynamics(args)

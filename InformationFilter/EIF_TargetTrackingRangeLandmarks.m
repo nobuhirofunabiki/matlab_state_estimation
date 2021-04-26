@@ -13,7 +13,7 @@ classdef EIF_TargetTrackingRangeLandmarks < ExtendedInformationFilter
     methods (Access = public)
         function obj = EIF_TargetTrackingRangeLandmarks(args)
             obj@ExtendedInformationFilter(args);
-            obj.checkConstructorArguments(args);
+            % obj.checkConstructorArguments(args);
             obj.range_sensor_           = RangeMeasurementLandmarks(args.rml);
             obj.state_vector            = args.state_vector;
             obj.state_covmat            = args.state_covmat;

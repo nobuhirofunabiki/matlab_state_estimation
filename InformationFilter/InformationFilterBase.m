@@ -5,6 +5,8 @@ classdef InformationFilterBase < handle
     properties (SetAccess = protected)
         info_vector             % xi(k): Information vector
         info_matrix             % Sigma(k): Information matrix
+        obs_info_vector         % Information contribution vector
+        obs_info_matrix         % Information contribution matrix
     end
     properties (Abstract = true, SetAccess = protected)
         state_vector            % x(k): State vector
@@ -17,6 +19,8 @@ classdef InformationFilterBase < handle
             obj.num_variables           = num_vars;
             obj.info_vector             = zeros(num_vars, 1);
             obj.info_matrix             = zeros(num_vars, num_vars);
+            obj.obs_info_vector         = zeros(num_vars, 1);
+            obj.obs_info_matrix         = zeros(num_vars, num_vars);
         end
     end
 
@@ -28,6 +32,7 @@ classdef InformationFilterBase < handle
         function executeInformationFilter(this, args)
             this.predictStateVectorAndCovariance();
             this.convertMomentsToInformationForm();
+            this.clearInformationContribution();
             this.addObservationInformation(...
                 args.obs_matrix, args.obs_covmat, args.measures);
             this.convertInformationToMomentsForm();
@@ -35,10 +40,17 @@ classdef InformationFilterBase < handle
     end
 
     methods (Access = protected)
+        function clearInformationContribution(this)
+            this.obs_info_vector = zeros(this.num_variables, 1);
+            this.obs_info_matrix = zeros(this.num_variables, this.num_variables);
+        end
+
         function addObservationInformation(this, obs_matrix, obs_covmat, measures)
             H = obs_matrix;
             R = obs_covmat;
             y = measures;
+            this.obs_info_vector = this.obs_info_vector + H.'/R*y;
+            this.obs_info_matrix = this.obs_info_vector + H.'/R*H;
             this.info_vector = this.info_vector + H.'/R*y;
             this.info_matrix = this.info_matrix + H.'/R*H;
         end
@@ -75,6 +87,14 @@ classdef InformationFilterBase < handle
 
         function output = getStateCovarianceMatrix(this)
             output = this.state_covmat;
+        end
+
+        function output = getInformationContributionVector(this)
+            output = this.obs_info_vector;
+        end
+
+        function output = getInformationContributionMatrix(this)
+            output = this.obs_info_matrix;
         end
     end
     

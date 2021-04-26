@@ -4,14 +4,15 @@ classdef UnscentedKalmanFilterBase < handle
         weights_cov     % weights for covariances
         sigma_points    % [row: estimated state, column: number of sigma point]
         X_diff
-        Pzz
-        Pxz
+        Pzz             % observation covariance
+        Pxz             % cross-correlation covariance (state and observation)
         Z_diff
-        z_pred
-        measurements
-        K
+        z_pred          % predicted measurements
+        measurements    % actual measurements
+        K               % Kalman gain
     end
     properties (SetAccess = immutable)
+        % alpha, beta, gamma, lambda, kappa are UKF parameters.
         alpha
         beta
         gamma
@@ -20,7 +21,7 @@ classdef UnscentedKalmanFilterBase < handle
         num_variables   % state dimunsion (L) 
     end
     properties (Abstract = true, SetAccess = protected)
-        state_vector    % representative estimated state
+        state_vector    % representative estimated state (mean)
         state_covmat    % state covariance
     end
 
