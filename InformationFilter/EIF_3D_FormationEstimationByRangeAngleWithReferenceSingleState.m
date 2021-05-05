@@ -53,8 +53,8 @@ classdef EIF_3D_FormationEstimationByRangeAngleWithReferenceSingleState < ...
             num_dims    = this.num_dimensions;
             num_agents  = this.num_agents;
 
-            for iAgents = 1:this.num_agents+1
-                for jAgents = 1:this.num_agents+1
+            for iAgents = 1:num_agents+1
+                for jAgents = 1:num_agents+1
                     if (iAgents~=this.agent_id && jAgents~=this.agent_id)
                         adjacent_matrix.range(iAgents, jAgents) = 0;
                         adjacent_matrix.angle(iAgents, jAgents) = 0;
