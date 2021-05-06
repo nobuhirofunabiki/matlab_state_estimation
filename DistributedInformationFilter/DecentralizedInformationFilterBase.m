@@ -46,7 +46,6 @@ classdef DecentralizedInformationFilterBase < handle
 
     methods (Access = private)
         function checkConstructorArguments(this, args)
-            disp("Check constructor arguments for DistributedInformationFilterBase");
             assert(isequal(size(args.state_vector), [args.number_variables, 1]), ...
                 "state_vector is NOT correct size vector");
         end
